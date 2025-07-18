@@ -230,18 +230,10 @@ export const ImageUpload = forwardRef<any, ImageUploadProps>(
         const text = await extractTextFromImage(selectedFile);
         setOcrText(text);
         let match, bookmakers;
-        const openaiKey = import.meta.env.VITE_OPENAI_API_KEY;
-        if (openaiKey) {
-          // Usar OpenAI para estruturar os dados
-          const result = await extractArbitrageWithOpenAI(text, openaiKey);
-          match = result.match;
-          bookmakers = result.bookmakers;
-        } else {
-          // Fallback para parser local
-          const parsed = parseArbitrageFromText(text);
-          match = parsed.match;
-          bookmakers = parsed.bookmakers;
-        }
+        // Sempre usar parser local, ignorar OpenAI
+        const parsed = parseArbitrageFromText(text);
+        match = parsed.match;
+        bookmakers = parsed.bookmakers;
         if (
           !match.team1 ||
           !match.team2 ||
