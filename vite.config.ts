@@ -15,7 +15,15 @@ export default defineConfig({
     open: true,
   },
   build: {
-    outDir: "dist",
-    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom"],
+          ocr: ["/src/utils/ocr.ts"],
+          calculations: ["/src/utils/calculations.ts"],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1200,
   },
 });
