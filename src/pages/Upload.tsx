@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { ImageUpload } from "../components/upload/ImageUpload";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
@@ -25,6 +25,7 @@ export const Upload: React.FC = () => {
   const [toastMsg, setToastMsg] = useState("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { debugOcr } = useUIStore();
+  const imageUploadRef = useRef<any>(null);
 
   const handleFileSelect = (file: File) => {
     console.log("File selected:", file);
@@ -68,6 +69,22 @@ export const Upload: React.FC = () => {
     // Salvar novamente só se quiser sobrescrever, aqui só feedback
     setToastMsg("Arbitragem salva com sucesso!");
     setShowToast(true);
+    // Resetar states para novo upload
+    setProcessedData(null);
+    setLocalError(null);
+    setIsProcessing(false);
+    // Limpar imagem do upload
+    imageUploadRef.current?.clear?.();
+  };
+
+  const handleDiscardArbitrage = () => {
+    setProcessedData(null);
+    setLocalError(null);
+    setIsProcessing(false);
+    setToastMsg("Arbitragem descartada.");
+    setShowToast(true);
+    // Limpar imagem do upload
+    imageUploadRef.current?.clear?.();
   };
 
   const handleEdit = () => {
@@ -123,6 +140,7 @@ export const Upload: React.FC = () => {
       {/* Upload Section */}
       <div className="max-w-2xl mx-auto">
         <ImageUpload
+          ref={imageUploadRef}
           onFileSelect={handleFileSelect}
           onProcessingStart={handleProcessingStart}
           onProcessingComplete={handleProcessingComplete}
@@ -387,6 +405,9 @@ export const Upload: React.FC = () => {
           <div className="flex justify-end space-x-4 mt-6 pt-6 border-t border-gray-200">
             <Button variant="outline" onClick={handleEdit}>
               Editar Dados
+            </Button>
+            <Button variant="outline" onClick={handleDiscardArbitrage}>
+              Descartar
             </Button>
             <Button
               onClick={handleSaveArbitrage}
