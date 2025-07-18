@@ -1,46 +1,201 @@
-# Getting Started with Create React App
+# ArbWeb - Sistema de Arbitragem Esportiva Premium
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Um sistema web premium para análise de arbitragem esportiva que processa imagens de odds de casas de apostas e gera métricas detalhadas.
 
-## Available Scripts
+## 🚀 Funcionalidades
 
-In the project directory, you can run:
+### Core Features
 
-### `npm start`
+- **Upload de Imagens**: Interface drag & drop premium para upload de imagens de odds
+- **Processamento OCR**: Extração automática de dados de casas de apostas, odds e métricas
+- **Dashboard Premium**: Métricas em tempo real, gráficos interativos e análises avançadas
+- **Gestão de Arbitragens**: Tabela completa com filtros, busca e ordenação
+- **Cálculos Automáticos**: ROI, lucro garantido, distribuição ótima de apostas
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### Design System Premium
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+- **Paleta de Cores**: Azul profissional (#2563eb), Verde sucesso (#059669), Vermelho alerta (#dc2626)
+- **Componentes UI**: Cards com sombras sutis, botões com gradientes, animações suaves
+- **Responsividade**: Mobile-first design com breakpoints otimizados
+- **Acessibilidade**: Contraste adequado, navegação por teclado, labels apropriados
 
-### `npm test`
+## 🛠️ Stack Tecnológica
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Frontend
 
-### `npm run build`
+- **React 18** com TypeScript
+- **Zustand** para gerenciamento de estado
+- **Tailwind CSS** com configuração premium
+- **Recharts** para gráficos interativos
+- **Lucide React** para ícones
+- **React Dropzone** para upload de arquivos
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Estrutura de Dados
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```typescript
+interface ArbitrageData {
+  id: string;
+  timestamp: Date;
+  match: {
+    team1: string;
+    team2: string;
+    sport: string;
+    competition: string;
+  };
+  bookmakers: {
+    name: string;
+    odds: number;
+    betType: string;
+    stake: number;
+    profit: number;
+  }[];
+  metrics: {
+    totalProfit: number;
+    profitPercentage: number;
+    roi: number;
+    totalStake: number;
+    arbitragePercentage: number;
+  };
+  imageUrl: string;
+  status: "processed" | "pending" | "error";
+}
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 📁 Estrutura do Projeto
 
-### `npm run eject`
+```
+src/
+├── components/
+│   ├── ui/              # Componentes base (Button, Card, Input)
+│   ├── dashboard/       # Componentes do dashboard
+│   ├── upload/          # Componentes de upload
+│   ├── charts/          # Componentes de gráficos
+│   └── layout/          # Header e Sidebar
+├── pages/               # Páginas principais
+├── stores/              # Stores Zustand
+├── utils/               # Utilitários (OCR, cálculos, formatação)
+├── types/               # Tipos TypeScript
+└── styles/              # Estilos globais
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## 🚀 Instalação e Execução
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Pré-requisitos
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- Node.js 16+
+- npm ou yarn
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Instalação
 
-## Learn More
+```bash
+# Clone o repositório
+git clone <repository-url>
+cd arbweb
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+# Instale as dependências
+npm install
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+# Execute o projeto
+npm start
+```
+
+### Scripts Disponíveis
+
+```bash
+npm start          # Executa o servidor de desenvolvimento
+npm run build      # Gera build de produção
+npm test           # Executa os testes
+npm run eject      # Ejecta configurações (irreversível)
+```
+
+## 🎨 Design System
+
+### Cores
+
+- **Primary**: #2563eb (Azul profissional)
+- **Secondary**: #059669 (Verde sucesso)
+- **Accent**: #dc2626 (Vermelho alerta)
+- **Background**: #f8fafc (Cinza claro)
+- **Surface**: #ffffff (Branco)
+- **Text**: #1e293b (Cinza escuro)
+
+### Componentes
+
+- **Cards**: Sombras sutis, bordas arredondadas, hover effects
+- **Buttons**: Gradientes premium, estados interativos
+- **Tables**: Zebra striping, ordenação visual, paginação
+- **Forms**: Validação em tempo real, animações suaves
+
+## 📊 Funcionalidades Avançadas
+
+### Dashboard
+
+- Métricas em tempo real (lucro total, ROI médio, taxa de sucesso)
+- Gráficos interativos (lucro ao longo do tempo, distribuição por casas)
+- Tabela de oportunidades com filtros avançados
+- Cards de métricas com indicadores de tendência
+
+### Upload e Processamento
+
+- Interface drag & drop premium
+- Preview de imagens antes do processamento
+- Validação de tipos de arquivo e tamanho
+- Compressão automática de imagens
+- Processamento OCR simulado
+
+### Analytics
+
+- Gráfico de lucro ao longo do tempo
+- Distribuição por casas de apostas
+- Ranking de melhores arbitragens
+- Análise de performance por esporte
+
+## 🔧 Configuração
+
+### Tailwind CSS
+
+O projeto usa Tailwind CSS com configuração customizada para cores premium e componentes específicos.
+
+### Zustand Stores
+
+- **arbitrage.ts**: Gerencia dados de arbitragem e métricas
+- **ui.ts**: Controla estado da UI (sidebar, tema, filtros)
+- **auth.ts**: Gerencia autenticação e preferências do usuário
+
+## 🚀 Próximas Funcionalidades
+
+### Fase 2: Enhancement
+
+- [ ] Integração com APIs de odds em tempo real
+- [ ] Sistema de notificações push
+- [ ] Exportação de dados (CSV, PDF)
+- [ ] Backup automático dos dados
+
+### Fase 3: Premium Features
+
+- [ ] Análise preditiva de oportunidades
+- [ ] Alertas automáticos para arbitragens
+- [ ] Integração com Firebase
+- [ ] Sistema de backup em nuvem
+
+## 📝 Licença
+
+Este projeto é desenvolvido como um sistema premium de arbitragem esportiva.
+
+## 🤝 Contribuição
+
+Para contribuir com o projeto:
+
+1. Fork o repositório
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📞 Suporte
+
+Para suporte e dúvidas, entre em contato através do email: suporte@arbweb.com
+
+---
+
+**ArbWeb** - Sistema Premium de Arbitragem Esportiva
