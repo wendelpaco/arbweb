@@ -33,12 +33,22 @@ export const ArbitrageTable: React.FC<ArbitrageTableProps> = ({
 
   const filteredArbitrages = arbitrages.filter(
     (arbitrage) =>
-      arbitrage.match.team1.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      arbitrage.match.team2.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      arbitrage.match.sport.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      arbitrage.bookmakers.some((bm) =>
-        bm.name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      arbitrage.match &&
+      ((arbitrage.match.team1 &&
+        arbitrage.match.team1
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())) ||
+        (arbitrage.match.team2 &&
+          arbitrage.match.team2
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())) ||
+        (arbitrage.match.sport &&
+          arbitrage.match.sport
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())) ||
+        arbitrage.bookmakers.some((bm) =>
+          bm.name.toLowerCase().includes(searchTerm.toLowerCase())
+        ))
   );
 
   const sortedArbitrages = [...filteredArbitrages].sort((a, b) => {
@@ -145,41 +155,55 @@ export const ArbitrageTable: React.FC<ArbitrageTableProps> = ({
                 <td className="py-4 px-4">
                   <div>
                     <div className="font-medium text-gray-900">
-                      {arbitrage.match.team1} vs {arbitrage.match.team2}
+                      {(arbitrage.match?.team1 || "-") +
+                        " vs " +
+                        (arbitrage.match?.team2 || "-")}
                     </div>
                     <div className="text-sm text-gray-500">
-                      {arbitrage.match.competition}
+                      {arbitrage.match?.competition || "-"}
                     </div>
                   </div>
                 </td>
                 <td className="py-4 px-4">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {arbitrage.match.sport}
+                    {arbitrage.match?.sport || "-"}
                   </span>
                 </td>
                 <td className="py-4 px-4">
                   <div
                     className={`font-medium ${
-                      arbitrage.metrics.totalProfit >= 0
+                      arbitrage.metrics && arbitrage.metrics.totalProfit >= 0
                         ? "text-secondary-600"
                         : "text-accent-600"
                     }`}
                   >
-                    {formatProfit(arbitrage.metrics.totalProfit)}
+                    {arbitrage.metrics ? (
+                      formatProfit(arbitrage.metrics.totalProfit)
+                    ) : (
+                      <span className="text-accent-600">-</span>
+                    )}
                   </div>
                   <div className="text-sm text-gray-500">
-                    {formatPercentage(arbitrage.metrics.profitPercentage)}
+                    {arbitrage.metrics ? (
+                      formatPercentage(arbitrage.metrics.profitPercentage)
+                    ) : (
+                      <span className="text-accent-600">-</span>
+                    )}
                   </div>
                 </td>
                 <td className="py-4 px-4">
                   <div
                     className={`font-medium ${
-                      arbitrage.metrics.roi >= 0
+                      arbitrage.metrics && arbitrage.metrics.roi >= 0
                         ? "text-secondary-600"
                         : "text-accent-600"
                     }`}
                   >
-                    {formatROI(arbitrage.metrics.roi)}
+                    {arbitrage.metrics ? (
+                      formatROI(arbitrage.metrics.roi)
+                    ) : (
+                      <span className="text-accent-600">-</span>
+                    )}
                   </div>
                 </td>
                 <td className="py-4 px-4">

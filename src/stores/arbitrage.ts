@@ -116,28 +116,31 @@ export const useArbitrageStore = create<ArbitrageState>()(
 
         // Calculate total profit
         const totalProfit = arbitrages.reduce(
-          (sum, arb) => sum + arb.metrics.totalProfit,
+          (sum, arb) => sum + (arb.metrics?.totalProfit ?? 0),
           0
         );
 
         // Calculate average ROI
         const totalRoi = arbitrages.reduce(
-          (sum, arb) => sum + arb.metrics.roi,
+          (sum, arb) => sum + (arb.metrics?.roi ?? 0),
           0
         );
-        const averageRoi = totalRoi / arbitrages.length;
+        const averageRoi =
+          arbitrages.length > 0 ? totalRoi / arbitrages.length : 0;
 
         // Calculate success rate (arbitrages with positive profit)
         const successfulArbitrages = arbitrages.filter(
-          (arb) => arb.metrics.totalProfit > 0
+          (arb) => (arb.metrics?.totalProfit ?? 0) > 0
         );
         const successRate =
-          (successfulArbitrages.length / arbitrages.length) * 100;
+          arbitrages.length > 0
+            ? (successfulArbitrages.length / arbitrages.length) * 100
+            : 0;
 
         // Find best bookmaker
         const bookmakerProfits: { [key: string]: number } = {};
         arbitrages.forEach((arb) => {
-          arb.bookmakers.forEach((bm) => {
+          (arb.bookmakers ?? []).forEach((bm) => {
             bookmakerProfits[bm.name] =
               (bookmakerProfits[bm.name] || 0) + bm.profit;
           });
@@ -150,8 +153,11 @@ export const useArbitrageStore = create<ArbitrageState>()(
         // Find most profitable sport
         const sportProfits: { [key: string]: number } = {};
         arbitrages.forEach((arb) => {
-          sportProfits[arb.match.sport] =
-            (sportProfits[arb.match.sport] || 0) + arb.metrics.totalProfit;
+          if (arb.match && arb.match.sport) {
+            sportProfits[arb.match.sport] =
+              (sportProfits[arb.match.sport] || 0) +
+              (arb.metrics?.totalProfit ?? 0);
+          }
         });
         const mostProfitableSport =
           Object.entries(sportProfits).sort(([, a], [, b]) => b - a)[0]?.[0] ||
@@ -166,7 +172,7 @@ export const useArbitrageStore = create<ArbitrageState>()(
 
         const profitByPeriod = recentArbitrages.reduce((acc, arb) => {
           const date = arb.timestamp.toISOString().split("T")[0];
-          acc[date] = (acc[date] || 0) + arb.metrics.totalProfit;
+          acc[date] = (acc[date] || 0) + (arb.metrics?.totalProfit ?? 0);
           return acc;
         }, {} as { [key: string]: number });
 
@@ -182,7 +188,7 @@ export const useArbitrageStore = create<ArbitrageState>()(
           ([name, totalProfit]) => ({
             name,
             count: arbitrages.filter((arb) =>
-              arb.bookmakers.some((bm) => bm.name === name)
+              (arb.bookmakers ?? []).some((bm) => bm.name === name)
             ).length,
             totalProfit,
           })
@@ -192,7 +198,9 @@ export const useArbitrageStore = create<ArbitrageState>()(
         const sportDistribution = Object.entries(sportProfits).map(
           ([sport, totalProfit]) => ({
             sport,
-            count: arbitrages.filter((arb) => arb.match.sport === sport).length,
+            count: arbitrages.filter(
+              (arb) => arb.match && arb.match.sport === sport
+            ).length,
             totalProfit,
           })
         );

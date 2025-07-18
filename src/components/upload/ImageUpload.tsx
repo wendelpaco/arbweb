@@ -10,11 +10,10 @@ import {
 } from "../../utils/ocr";
 import { formatFileSize, formatFileName } from "../../utils/formatters";
 import { validateAndCalculateArbitrage } from "../../utils/calculations";
+import { extractArbitrageWithOpenAI } from "../../utils/openai";
 
-// Função simples para parsear texto OCR em dados de arbitragem (ajuste conforme necessário)
+// Função robusta para parsear texto OCR em dados de arbitragem
 function parseArbitrageFromText(text: string) {
-  // Exemplo simplificado: busca odds, stakes e casas por regex
-  // Este parser pode ser melhorado para lidar com diferentes layouts
   const lines = text
     .split(/\n|\r/)
     .map((l) => l.trim())
@@ -22,11 +21,12 @@ function parseArbitrageFromText(text: string) {
   let match = { team1: "", team2: "", sport: "", competition: "" };
   let bookmakers = [];
   let foundTeams = false;
+  let stakeTotal = 0;
 
   // Detectar times e competição
   for (let line of lines) {
-    if (!foundTeams && line.match(/\s*-\s*/)) {
-      const [team1, team2] = line.split(/\s*-\s*/);
+    if (!foundTeams && line.match(/\s*[—-]\s*/)) {
+      const [team1, team2] = line.split(/\s*[—-]\s*/);
       if (team1 && team2) {
         match.team1 = team1.trim();
         match.team2 = team2.trim();
@@ -35,32 +35,49 @@ function parseArbitrageFromText(text: string) {
     }
     if (line.toLowerCase().includes("futebol")) match.sport = "Futebol";
     if (
-      line.toLowerCase().includes("copa") ||
       line.toLowerCase().includes("serie") ||
       line.toLowerCase().includes("liga") ||
-      line.toLowerCase().includes("fa")
+      line.toLowerCase().includes("copa") ||
+      line.toLowerCase().includes("brasil")
     ) {
-      match.competition = line.trim();
+      match.competition = line.replace(/futebol\s*\//i, "").trim();
+    }
+    // Detectar stake total
+    if (line.toLowerCase().includes("aposta total")) {
+      const stakeMatch = line.match(/([0-9]{3,}[.,]?[0-9]*)/);
+      if (stakeMatch) {
+        stakeTotal = parseFloat(stakeMatch[1].replace(/,/g, "."));
+      }
     }
   }
 
-  // Detectar casas, odds, stakes
+  // Detectar casas, odds, stakes, lucros
   for (let i = 0; i < lines.length; i++) {
-    const casaMatch = lines[i].match(/([A-Za-z0-9 ]+)(\(BR\))?/);
-    const oddsMatch = lines[i + 1]?.match(/([0-9]+[.,][0-9]+)/);
-    const stakeMatch = lines[i + 2]?.match(/([0-9]+[.,][0-9]+)/);
-    if (casaMatch && oddsMatch && stakeMatch) {
+    // Regex para odds, stake e lucro (números com ponto ou vírgula, ou colados)
+    const regex =
+      /([A-Za-z0-9 ()\-+\.]+)\s+([0-9]{1,2}(?:[.,][0-9]+)?)\s+([A-Za-z0-9 ()\-+\.]+)?\s*([0-9]{4,}(?:[.,][0-9]+)?)\s*[A-Za-z]*\s*([0-9]{3,}(?:[.,][0-9]+)?)/;
+    const m = lines[i].match(regex);
+    if (m) {
+      // Corrigir números colados (ex: 1731185 → 17311.85 se stake for muito grande)
+      let stake = m[4];
+      if (stake.length > 6 && stake.indexOf(".") === -1) {
+        stake = stake.slice(0, -2) + "." + stake.slice(-2);
+      }
+      let profit = m[5];
+      if (profit && profit.length > 6 && profit.indexOf(".") === -1) {
+        profit = profit.slice(0, -2) + "." + profit.slice(-2);
+      }
       bookmakers.push({
-        name: casaMatch[1].trim(),
-        odds: parseFloat(oddsMatch[1].replace(",", ".")),
-        betType: lines[i + 1],
-        stake: parseFloat(stakeMatch[1].replace(",", ".")),
-        profit: 0, // será calculado depois
+        name: m[1].trim(),
+        odds: parseFloat(m[2].replace(",", ".")),
+        betType: m[3]?.trim() || "",
+        stake: parseFloat(stake.replace(/,/g, ".")),
+        profit: profit ? parseFloat(profit.replace(/,/g, ".")) : 0,
       });
     }
   }
 
-  return { match, bookmakers };
+  return { match, bookmakers, stakeTotal };
 }
 
 interface ImageUploadProps {
@@ -80,6 +97,8 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [ocrText, setOcrText] = useState<string>("");
+  const [autoEdit, setAutoEdit] = useState(false);
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -129,18 +148,61 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 
   const handleProcess = async () => {
     if (!selectedFile) return;
-
     onProcessingStart();
     try {
       // OCR real
       const text = await extractTextFromImage(selectedFile);
-      const { match, bookmakers } = parseArbitrageFromText(text);
-      if (!match.team1 || !match.team2 || bookmakers.length === 0) {
-        throw new Error("Não foi possível extrair dados válidos da imagem.");
+      setOcrText(text);
+      let match, bookmakers;
+      const openaiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      if (openaiKey) {
+        // Usar OpenAI para estruturar os dados
+        const result = await extractArbitrageWithOpenAI(text, openaiKey);
+        match = result.match;
+        bookmakers = result.bookmakers;
+      } else {
+        // Fallback para parser local
+        const parsed = parseArbitrageFromText(text);
+        match = parsed.match;
+        bookmakers = parsed.bookmakers;
+      }
+      if (
+        !match.team1 ||
+        !match.team2 ||
+        !bookmakers ||
+        bookmakers.length === 0
+      ) {
+        setAutoEdit(true); // abrir modal de edição automática
+        // Chamar onProcessingComplete para garantir que o texto OCR seja exibido
+        onProcessingComplete({
+          ocrText: text,
+          match: match || {},
+          bookmakers: bookmakers || [],
+          metrics: {
+            totalProfit: 0,
+            profitPercentage: 0,
+            roi: 0,
+            totalStake: 0,
+            arbitragePercentage: 0,
+          },
+          validation: {
+            isValid: false,
+            message: "Dados incompletos",
+            metrics: {
+              totalProfit: 0,
+              profitPercentage: 0,
+              roi: 0,
+              totalStake: 0,
+              arbitragePercentage: 0,
+            },
+          },
+        });
+        throw new Error(
+          "Não foi possível extrair dados válidos da imagem. Edite manualmente."
+        );
       }
       // Calcular payouts e validar
-      const totalInvestment = bookmakers.reduce((sum, bm) => sum + bm.stake, 0);
-      const bmsWithProfit = bookmakers.map((bm) => ({
+      const bmsWithProfit = bookmakers.map((bm: any) => ({
         ...bm,
         profit: bm.stake * bm.odds,
       }));
@@ -150,9 +212,36 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         bookmakers: bmsWithProfit,
         metrics: validation.metrics,
         validation,
+        ocrText: text,
       };
       onProcessingComplete(processedData);
     } catch (error: any) {
+      // Sempre chamar onProcessingComplete para garantir debug
+      if (ocrText) {
+        onProcessingComplete({
+          ocrText,
+          match: {},
+          bookmakers: [],
+          metrics: {
+            totalProfit: 0,
+            profitPercentage: 0,
+            roi: 0,
+            totalStake: 0,
+            arbitragePercentage: 0,
+          },
+          validation: {
+            isValid: false,
+            message: "Erro no OCR",
+            metrics: {
+              totalProfit: 0,
+              profitPercentage: 0,
+              roi: 0,
+              totalStake: 0,
+              arbitragePercentage: 0,
+            },
+          },
+        });
+      }
       onError(error.message || "Erro ao processar imagem");
     }
   };
@@ -234,3 +323,12 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     </div>
   );
 };
+
+declare global {
+  interface ImportMeta {
+    env: {
+      VITE_OPENAI_API_KEY?: string;
+      [key: string]: any;
+    };
+  }
+}

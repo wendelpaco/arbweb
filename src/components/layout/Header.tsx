@@ -87,16 +87,16 @@ export const Header: React.FC = () => {
   const { title, subtitle } = getPageTitle();
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-40">
+    <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4 sticky top-0 z-40 transition-colors">
       <div className="flex items-center justify-between h-12">
         {/* Left side - Logo and Menu */}
         <div className="flex items-center space-x-4">
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
             aria-label="Toggle sidebar"
           >
-            <Menu className="w-5 h-5 text-gray-600" />
+            <Menu className="w-5 h-5 text-gray-600 dark:text-gray-200" />
           </button>
 
           <div className="flex items-center space-x-3">
@@ -104,10 +104,10 @@ export const Header: React.FC = () => {
               <span className="text-white font-bold text-lg">A</span>
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg font-bold text-gray-900 leading-tight">
+              <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
                 ArbWeb
               </h1>
-              <p className="text-xs text-gray-500 leading-tight">
+              <p className="text-xs text-gray-500 dark:text-gray-300 leading-tight">
                 Sistema de Arbitragem
               </p>
             </div>
@@ -117,8 +117,12 @@ export const Header: React.FC = () => {
         {/* Center - Page Title (hidden on mobile) */}
         <div className="hidden md:flex items-center justify-center flex-1 px-8">
           <div className="text-center">
-            <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-            <p className="text-sm text-gray-500">{subtitle}</p>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              {title}
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-300">
+              {subtitle}
+            </p>
           </div>
         </div>
 
@@ -126,44 +130,52 @@ export const Header: React.FC = () => {
         <div className="flex items-center space-x-3">
           {/* Action Buttons */}
           <div className="hidden sm:flex items-center space-x-2">
-            <Button variant="outline" size="sm" className="h-8 px-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 px-3 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
+            >
               <span className="hidden sm:inline">Atualizar</span>
             </Button>
-            <Button variant="outline" size="sm" className="h-8 px-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 px-3 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
+            >
               <span className="hidden sm:inline">Exportar</span>
             </Button>
           </div>
 
           {/* Notifications */}
           <button
-            className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+            className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
             aria-label="Notifications"
           >
-            <Bell className="w-5 h-5 text-gray-600" />
+            <Bell className="w-5 h-5 text-gray-600 dark:text-gray-200" />
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
 
           {/* Settings */}
           <button
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
             aria-label="Settings"
           >
-            <Settings className="w-5 h-5 text-gray-600" />
+            <Settings className="w-5 h-5 text-gray-600 dark:text-gray-200" />
           </button>
 
           {/* User menu */}
           <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex items-center space-x-3 pl-2 border-l border-gray-200 hover:bg-gray-50 rounded-lg p-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              className="flex items-center space-x-3 pl-2 border-l border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg p-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
               aria-label="User menu"
               aria-expanded={userMenuOpen}
             >
               <div className="hidden sm:block text-right">
-                <p className="text-sm font-medium text-gray-900 leading-tight">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-tight">
                   {user?.name || "Usuário"}
                 </p>
-                <p className="text-xs text-gray-500 leading-tight">
+                <p className="text-xs text-gray-500 dark:text-gray-300 leading-tight">
                   {user?.email || "usuario@exemplo.com"}
                 </p>
               </div>
@@ -171,7 +183,7 @@ export const Header: React.FC = () => {
                 <User className="w-4 h-4 text-white" />
               </div>
               <ChevronDown
-                className={`w-4 h-4 text-gray-400 transition-transform ${
+                className={`w-4 h-4 text-gray-400 dark:text-gray-200 transition-transform ${
                   userMenuOpen ? "rotate-180" : ""
                 }`}
               />
@@ -179,25 +191,25 @@ export const Header: React.FC = () => {
 
             {/* Dropdown Menu */}
             {userMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                <div className="px-4 py-2 border-b border-gray-100">
-                  <p className="text-sm font-medium text-gray-900">
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
+                <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                     {user?.name || "Usuário"}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-300">
                     {user?.email || "usuario@exemplo.com"}
                   </p>
                 </div>
                 <div className="py-1">
-                  <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                  <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                     <UserIcon className="w-4 h-4 mr-3" />
                     Meu Perfil
                   </button>
-                  <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                  <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                     <Settings className="w-4 h-4 mr-3" />
                     Configurações
                   </button>
-                  <div className="border-t border-gray-100 my-1"></div>
+                  <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
                   <button
                     onClick={logout}
                     className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"

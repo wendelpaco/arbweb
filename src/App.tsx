@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
+import { useUIStore } from "./stores/ui";
 import { Layout } from "./components/layout/Layout";
 import { Dashboard } from "./pages/Dashboard";
 import { Upload } from "./pages/Upload";
@@ -11,11 +12,40 @@ import { Settings } from "./pages/Settings";
 import { Help } from "./pages/Help";
 import { initializeSampleData } from "./utils/sampleData";
 
-function App() {
+const App: React.FC = () => {
+  const { theme } = useUIStore();
+
   useEffect(() => {
     // Inicializa dados de exemplo se não existirem
     initializeSampleData();
   }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else if (theme === "light") {
+      root.classList.remove("dark");
+    } else if (theme === "auto") {
+      // Seguir o sistema operacional
+      const mq = window.matchMedia("(prefers-color-scheme: dark)");
+      if (mq.matches) {
+        root.classList.add("dark");
+      } else {
+        root.classList.remove("dark");
+      }
+      // Atualizar ao mudar o sistema
+      const handler = (e: MediaQueryListEvent) => {
+        if (e.matches) {
+          root.classList.add("dark");
+        } else {
+          root.classList.remove("dark");
+        }
+      };
+      mq.addEventListener("change", handler);
+      return () => mq.removeEventListener("change", handler);
+    }
+  }, [theme]);
 
   return (
     <Router>
@@ -33,6 +63,6 @@ function App() {
       </Layout>
     </Router>
   );
-}
+};
 
 export default App;

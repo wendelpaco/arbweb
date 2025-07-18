@@ -14,6 +14,7 @@ import {
 import { formatCurrency, formatPercentage } from "../utils/formatters";
 import { Toast } from "../components/ui/Toast";
 import { EditArbitrageModal } from "../components/ui/EditArbitrageModal";
+import { useUIStore } from "../stores/ui";
 
 export const Upload: React.FC = () => {
   const { addArbitrage, setLoading, setError } = useArbitrageStore();
@@ -23,6 +24,7 @@ export const Upload: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { debugOcr } = useUIStore();
 
   const handleFileSelect = (file: File) => {
     console.log("File selected:", file);
@@ -147,6 +149,21 @@ export const Upload: React.FC = () => {
       {/* Results Display */}
       {processedData && (
         <Card className="max-w-4xl mx-auto">
+          {/* OCR Debug */}
+          {debugOcr && processedData.ocrText && (
+            <details
+              open
+              className="mb-4 bg-gray-50 border border-gray-200 rounded p-3 text-xs text-gray-700"
+            >
+              <summary className="cursor-pointer font-semibold text-gray-600 mb-2">
+                Texto OCR extraído (debug)
+              </summary>
+              <pre className="whitespace-pre-wrap break-all">
+                {processedData.ocrText}
+              </pre>
+            </details>
+          )}
+
           {/* Validation Status */}
           {processedData.validation && (
             <div
@@ -202,26 +219,50 @@ export const Upload: React.FC = () => {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Time 1:</span>
-                  <span className="font-medium">
-                    {processedData.match.team1}
+                  <span
+                    className={`font-medium ${
+                      !processedData.match.team1
+                        ? "text-accent-600 animate-pulse"
+                        : ""
+                    }`}
+                  >
+                    {processedData.match.team1 || "Preencha o time 1"}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Time 2:</span>
-                  <span className="font-medium">
-                    {processedData.match.team2}
+                  <span
+                    className={`font-medium ${
+                      !processedData.match.team2
+                        ? "text-accent-600 animate-pulse"
+                        : ""
+                    }`}
+                  >
+                    {processedData.match.team2 || "Preencha o time 2"}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Esporte:</span>
-                  <span className="font-medium">
-                    {processedData.match.sport}
+                  <span
+                    className={`font-medium ${
+                      !processedData.match.sport
+                        ? "text-accent-600 animate-pulse"
+                        : ""
+                    }`}
+                  >
+                    {processedData.match.sport || "Preencha o esporte"}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Competição:</span>
-                  <span className="font-medium">
-                    {processedData.match.competition}
+                  <span
+                    className={`font-medium ${
+                      !processedData.match.competition
+                        ? "text-accent-600 animate-pulse"
+                        : ""
+                    }`}
+                  >
+                    {processedData.match.competition || "Preencha a competição"}
                   </span>
                 </div>
               </div>
@@ -235,44 +276,62 @@ export const Upload: React.FC = () => {
                   <span className="text-gray-600">Lucro Total:</span>
                   <span
                     className={`font-medium ${
+                      processedData.metrics &&
                       processedData.metrics.totalProfit >= 0
                         ? "text-secondary-600"
                         : "text-accent-600"
                     }`}
                   >
-                    {formatCurrency(processedData.metrics.totalProfit)}
+                    {processedData.metrics ? (
+                      formatCurrency(processedData.metrics.totalProfit)
+                    ) : (
+                      <span className="text-accent-600">---</span>
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Percentual de Lucro:</span>
                   <span className="font-medium text-secondary-600">
-                    {formatPercentage(processedData.metrics.profitPercentage)}
+                    {processedData.metrics ? (
+                      formatPercentage(processedData.metrics.profitPercentage)
+                    ) : (
+                      <span className="text-accent-600">---</span>
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">ROI:</span>
                   <span className="font-medium text-secondary-600">
-                    {formatPercentage(processedData.metrics.roi)}
+                    {processedData.metrics ? (
+                      formatPercentage(processedData.metrics.roi)
+                    ) : (
+                      <span className="text-accent-600">---</span>
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Stake Total:</span>
                   <span className="font-medium">
-                    {formatCurrency(processedData.metrics.totalStake)}
+                    {processedData.metrics ? (
+                      formatCurrency(processedData.metrics.totalStake)
+                    ) : (
+                      <span className="text-accent-600">---</span>
+                    )}
                   </span>
                 </div>
-                {processedData.metrics.arbitragePercentage > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">
-                      Percentual de Arbitragem:
-                    </span>
-                    <span className="font-medium text-secondary-600">
-                      {formatPercentage(
-                        processedData.metrics.arbitragePercentage
-                      )}
-                    </span>
-                  </div>
-                )}
+                {processedData.metrics &&
+                  processedData.metrics.arbitragePercentage > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">
+                        Percentual de Arbitragem:
+                      </span>
+                      <span className="font-medium text-secondary-600">
+                        {formatPercentage(
+                          processedData.metrics.arbitragePercentage
+                        )}
+                      </span>
+                    </div>
+                  )}
               </div>
             </div>
           </div>
@@ -331,7 +390,16 @@ export const Upload: React.FC = () => {
             </Button>
             <Button
               onClick={handleSaveArbitrage}
-              disabled={!processedData.validation?.isValid}
+              disabled={
+                !(
+                  processedData.match.team1 &&
+                  processedData.match.team2 &&
+                  processedData.match.sport &&
+                  processedData.match.competition &&
+                  processedData.bookmakers.length > 0 &&
+                  processedData.validation?.isValid
+                )
+              }
             >
               Salvar Arbitragem
             </Button>

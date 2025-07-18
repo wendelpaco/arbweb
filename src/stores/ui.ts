@@ -4,9 +4,10 @@ import { UIState } from "../types";
 
 type UIStore = UIState & {
   toggleSidebar: () => void;
-  setTheme: (theme: "light" | "dark") => void;
+  setTheme: (theme: "light" | "dark" | "auto") => void;
   setFilters: (filters: Partial<UIState["selectedFilters"]>) => void;
   resetFilters: () => void;
+  setDebugOcr: (value: boolean) => void;
 };
 
 export const useUIStore = create<UIStore>()(
@@ -21,17 +22,14 @@ export const useUIStore = create<UIStore>()(
         minProfit: 0,
         minRoi: 0,
       },
-
+      debugOcr: false,
       toggleSidebar: () =>
         set((state) => ({ sidebarOpen: !state.sidebarOpen })),
-
       setTheme: (theme) => set({ theme }),
-
       setFilters: (filters) =>
         set((state) => ({
           selectedFilters: { ...state.selectedFilters, ...filters },
         })),
-
       resetFilters: () =>
         set({
           selectedFilters: {
@@ -42,12 +40,14 @@ export const useUIStore = create<UIStore>()(
             minRoi: 0,
           },
         }),
+      setDebugOcr: (value) => set({ debugOcr: value }),
     }),
     {
-      name: "ui-storage", // nome da chave no localStorage
+      name: "ui-storage",
       partialize: (state) => ({
         theme: state.theme,
         selectedFilters: state.selectedFilters,
+        debugOcr: state.debugOcr,
       }),
     }
   )

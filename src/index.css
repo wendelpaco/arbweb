@@ -42,3 +42,32 @@
     @apply bg-primary-50 text-primary-600 font-medium;
   }
 }
+
+@keyframes coin-bounce {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.7;
+  }
+  20% {
+    opacity: 1;
+  }
+  40% {
+    transform: translateY(-12px) scale(1.08);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(-18px) scale(1.12);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-8px) scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.7;
+  }
+}
+.animate-coin-bounce {
+  animation: coin-bounce 1.6s cubic-bezier(0.4, 0.8, 0.2, 1) infinite;
+}

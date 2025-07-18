@@ -43,7 +43,43 @@ export const MetricsCard: React.FC<MetricsCardProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+          <div className="flex items-center space-x-2 mt-1">
+            <p className="text-2xl font-bold text-gray-900">{value}</p>
+            {/* Animação de moeda subindo apenas para Lucro Total */}
+            {title.toLowerCase().includes("lucro") && (
+              <span className="relative inline-block h-7 w-7">
+                <svg
+                  className="absolute bottom-0 left-0 animate-coin-bounce"
+                  width="28"
+                  height="28"
+                  viewBox="0 0 28 28"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <ellipse
+                    cx="14"
+                    cy="14"
+                    rx="13"
+                    ry="13"
+                    fill="#FFD700"
+                    stroke="#F6C700"
+                    strokeWidth="2"
+                  />
+                  <ellipse cx="14" cy="14" rx="8" ry="8" fill="#FFF8DC" />
+                  <text
+                    x="14"
+                    y="18"
+                    textAnchor="middle"
+                    fontSize="12"
+                    fontWeight="bold"
+                    fill="#F6C700"
+                  >
+                    $
+                  </text>
+                </svg>
+              </span>
+            )}
+          </div>
           {change !== undefined && (
             <div className="flex items-center mt-2">
               {changeIcon[changeType]}

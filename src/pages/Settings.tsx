@@ -3,6 +3,8 @@ import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { useArbitrageStore } from "../stores/arbitrage";
+import { useUIStore } from "../stores/ui";
+import { Toast } from "../components/ui/Toast";
 import { initializeSampleData } from "../utils/sampleData";
 import {
   Settings as SettingsIcon,
@@ -24,6 +26,7 @@ export const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   const tabs = [
     { id: "profile", label: "Perfil", icon: <User className="w-4 h-4" /> },
@@ -128,8 +131,11 @@ export const Settings: React.FC = () => {
     },
   ];
 
+  const { debugOcr, setDebugOcr, theme, setTheme } = useUIStore();
+
   const handleSaveSettings = () => {
-    console.log("Saving settings...");
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2000);
   };
 
   const { clearAllData } = useArbitrageStore();
@@ -196,11 +202,19 @@ export const Settings: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 min-h-screen bg-background dark:bg-gray-900 dark:text-gray-100 transition-colors">
+      {showToast && (
+        <Toast
+          message="Configurações salvas com sucesso!"
+          onClose={() => setShowToast(false)}
+        />
+      )}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Configurações</h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            Configurações
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300">
             Gerencie suas preferências e configurações
           </p>
         </div>
@@ -215,7 +229,7 @@ export const Settings: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar */}
         <div className="lg:col-span-1">
-          <Card>
+          <Card className="dark:bg-gray-800 dark:border-gray-700">
             <nav className="space-y-1">
               {tabs.map((tab) => (
                 <button
@@ -428,36 +442,53 @@ export const Settings: React.FC = () => {
           )}
 
           {activeTab === "appearance" && (
-            <Card>
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">
                 Configurações de Aparência
               </h3>
               <div className="space-y-6">
-                {appearanceSettings.map((setting) => (
-                  <div
-                    key={setting.id}
-                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
-                  >
-                    <div>
-                      <h4 className="font-medium text-gray-900">
-                        {setting.title}
-                      </h4>
-                      <p className="text-sm text-gray-500">
-                        {setting.description}
-                      </p>
-                    </div>
-                    <select className="input-field w-48">
-                      {setting.options.map((option) => (
-                        <option
-                          key={option}
-                          selected={option === setting.current}
-                        >
-                          {option}
-                        </option>
-                      ))}
-                    </select>
+                <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                  <div>
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100">
+                      Tema
+                    </h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-300">
+                      Escolha entre tema claro, escuro ou automático
+                    </p>
                   </div>
-                ))}
+                  <select
+                    className="input-field w-48 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
+                    value={theme}
+                    onChange={(e) =>
+                      setTheme(e.target.value as "light" | "dark" | "auto")
+                    }
+                  >
+                    <option value="light">Claro</option>
+                    <option value="dark">Escuro</option>
+                    <option value="auto">Automático</option>
+                  </select>
+                </div>
+                {/* Toggle Debug OCR */}
+                <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                  <div>
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100">
+                      Exibir debug do OCR
+                    </h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-300">
+                      Ative para visualizar o texto OCR extraído das imagens na
+                      tela de upload.
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={debugOcr}
+                      onChange={(e) => setDebugOcr(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                  </label>
+                </div>
               </div>
             </Card>
           )}

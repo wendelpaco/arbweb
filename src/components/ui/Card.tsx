@@ -1,49 +1,32 @@
 import React from "react";
 import { clsx } from "clsx";
 
-export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  variant?: "default" | "elevated" | "outlined";
-  padding?: "none" | "sm" | "md" | "lg";
+  className?: string;
+  variant?: "default" | "outlined";
 }
 
-const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  (
-    { className, variant = "default", padding = "md", children, ...props },
-    ref
-  ) => {
-    const baseClasses = "rounded-xl transition-all duration-200";
-
-    const variantClasses = {
-      default: "bg-surface shadow-premium border border-gray-100",
-      elevated: "bg-surface shadow-premium-lg border border-gray-100",
-      outlined: "bg-surface border-2 border-gray-200",
-    };
-
-    const paddingClasses = {
-      none: "",
-      sm: "p-4",
-      md: "p-6",
-      lg: "p-8",
-    };
-
-    return (
-      <div
-        ref={ref}
-        className={clsx(
-          baseClasses,
-          variantClasses[variant],
-          paddingClasses[padding],
-          className
-        )}
-        {...props}
-      >
-        {children}
-      </div>
-    );
-  }
-);
-
-Card.displayName = "Card";
-
-export { Card };
+export const Card: React.FC<CardProps> = ({
+  children,
+  className = "",
+  variant = "default",
+  ...props
+}) => {
+  const base =
+    "rounded-xl shadow-premium p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors";
+  const outlined =
+    "border-2 border-primary-200 dark:border-primary-700 bg-white dark:bg-gray-900";
+  return (
+    <div
+      className={
+        base +
+        (variant === "outlined" ? " " + outlined : "") +
+        (className ? " " + className : "")
+      }
+      {...props}
+    >
+      {children}
+    </div>
+  );
+};

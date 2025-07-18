@@ -33,7 +33,7 @@ export interface ArbitrageData {
 
 export interface UIState {
   sidebarOpen: boolean;
-  theme: "light" | "dark";
+  theme: "light" | "dark" | "auto";
   selectedFilters: {
     dateRange: { start: Date | null; end: Date | null };
     sport: string;
@@ -41,6 +41,7 @@ export interface UIState {
     minProfit: number;
     minRoi: number;
   };
+  debugOcr: boolean;
 }
 
 export interface AuthState {
