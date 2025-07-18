@@ -1,32 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { MetricCard } from "../components/dashboard/MetricsCard";
+// import { MetricCard } from "../components/dashboard/MetricsCard";
 // import { ArbitrageTable } from "../components/dashboard/ArbitrageTable";
 import { ProfitChart } from "../components/charts/ProfitChart";
 import { DistributionChart } from "../components/charts/DistributionChart";
 import { useArbitrageStore } from "../stores/arbitrage";
 import { useAuthStore } from "../stores/auth";
 import { EditArbitrageModal } from "../components/ui/EditArbitrageModal";
-import {
-  Toast,
-  ToastProvider,
-  ToastViewport,
-  ToastClose,
-} from "../components/ui/toast";
+
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import {
   DollarSign,
-  Target,
+  // Target,
   Award,
-  TrendingDown,
-  ArrowUpRight,
   X,
   CheckCircle,
+  TrendingUp,
+  // Calendar,
+  PieChart,
 } from "lucide-react";
 import {
   formatCurrency,
   formatPercentage,
-  formatProfit,
+  // formatProfit,
   formatROI,
   formatRelativeTime,
 } from "../utils/formatters";
@@ -47,6 +43,12 @@ import {
 } from "@/components/ui/tooltip";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/Input";
+import {
+  Toast,
+  ToastClose,
+  ToastProvider,
+  ToastViewport,
+} from "@/components/ui/Toast";
 // import { Sparkline } from "../components/charts/Sparkline";
 
 export const Dashboard: React.FC = () => {
@@ -205,52 +207,52 @@ export const Dashboard: React.FC = () => {
                 </DialogContent>
               </Dialog>
             )}
-            {/* Cards de métricas premium */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-              <MetricCard
-                title="Lucro Total"
-                value={formatProfit(dashboardMetrics.totalProfit)}
-                change={dashboardMetrics.totalProfit}
-                icon={
-                  <DollarSign
-                    className={`w-6 h-6 ${
-                      dashboardMetrics.totalProfit < 0
-                        ? "text-red-500"
-                        : "text-yellow-500"
-                    }`}
-                  />
-                }
-                tooltip="Lucro acumulado das arbitragens no período selecionado."
-              />
-              <MetricCard
-                title="ROI Médio"
-                value={formatROI(dashboardMetrics.averageRoi)}
-                change={dashboardMetrics.averageRoi}
-                icon={
-                  <DollarSign
-                    className={`w-6 h-6 ${
-                      dashboardMetrics.averageRoi < 0
-                        ? "text-red-500"
-                        : "text-blue-500"
-                    }`}
-                  />
-                }
-                tooltip="Retorno médio sobre o investimento das arbitragens."
-              />
-              <MetricCard
-                title="Arbitragens"
-                value={dashboardMetrics.totalArbitrages}
-                change={dashboardMetrics.totalArbitrages}
-                icon={<Target className="w-6 h-6 text-purple-500" />}
-                tooltip="Total de arbitragens processadas no período."
-              />
-              <MetricCard
-                title="Taxa de Sucesso"
-                value={formatPercentage(dashboardMetrics.successRate)}
-                change={dashboardMetrics.successRate}
-                icon={<Award className="w-6 h-6 text-yellow-500" />}
-                tooltip="Percentual de arbitragens bem-sucedidas."
-              />
+            {/* Cards de métricas premium - visual profissional */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-10">
+              <Card className="rounded-2xl shadow-card p-8 flex flex-col gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                <div className="flex items-center gap-2 mb-1">
+                  <DollarSign className="w-5 h-5 text-green-500" />
+                  <span className="text-xs font-medium text-zinc-500">
+                    Lucro Total
+                  </span>
+                </div>
+                <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                  {formatCurrency(dashboardMetrics.totalProfit)}
+                </div>
+              </Card>
+              <Card className="rounded-2xl shadow-card p-8 flex flex-col gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                <div className="flex items-center gap-2 mb-1">
+                  <TrendingUp className="w-5 h-5 text-blue-500" />
+                  <span className="text-xs font-medium text-zinc-500">
+                    ROI Médio
+                  </span>
+                </div>
+                <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                  {formatROI(dashboardMetrics.averageRoi)}
+                </div>
+              </Card>
+              <Card className="rounded-2xl shadow-card p-8 flex flex-col gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                <div className="flex items-center gap-2 mb-1">
+                  <PieChart className="w-5 h-5 text-purple-500" />
+                  <span className="text-xs font-medium text-zinc-500">
+                    Arbitragens
+                  </span>
+                </div>
+                <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                  {dashboardMetrics.totalArbitrages}
+                </div>
+              </Card>
+              <Card className="rounded-2xl shadow-card p-8 flex flex-col gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                <div className="flex items-center gap-2 mb-1">
+                  <Award className="w-5 h-5 text-yellow-500" />
+                  <span className="text-xs font-medium text-zinc-500">
+                    Taxa de Sucesso
+                  </span>
+                </div>
+                <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                  {formatPercentage(dashboardMetrics.successRate)}
+                </div>
+              </Card>
             </div>
             {/* Gráficos premium */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">

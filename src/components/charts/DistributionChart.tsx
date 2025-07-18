@@ -22,8 +22,8 @@ interface DistributionChartProps {
 
 export const DistributionChart: React.FC<DistributionChartProps> = ({
   data,
-  title,
-  subtitle,
+  // title,
+  // subtitle,
 }) => {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {

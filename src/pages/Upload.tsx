@@ -16,7 +16,7 @@ import {
   ToastProvider,
   ToastViewport,
   ToastClose,
-} from "../components/ui/toast";
+} from "../components/ui/Toast";
 import { EditArbitrageModal } from "../components/ui/EditArbitrageModal";
 import { useUIStore } from "../stores/ui";
 

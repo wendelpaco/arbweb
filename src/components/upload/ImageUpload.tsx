@@ -5,8 +5,7 @@ import React, {
   forwardRef,
 } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
-import { Button } from "../ui/Button";
+import { Upload, X } from "lucide-react";
 import { Card } from "../ui/Card";
 import {
   validateImageFile,
@@ -15,7 +14,7 @@ import {
 } from "../../utils/ocr";
 import { formatFileSize, formatFileName } from "../../utils/formatters";
 import { validateAndCalculateArbitrage } from "../../utils/calculations";
-import { extractArbitrageWithOpenAI } from "../../utils/openai";
+// import { extractArbitrageWithOpenAI } from "../../utils/openai";
 
 // Função robusta para parsear texto OCR em dados de arbitragem
 function parseArbitrageFromText(text: string) {
@@ -26,7 +25,6 @@ function parseArbitrageFromText(text: string) {
   let match = { team1: "", team2: "", sport: "", competition: "" };
   let bookmakers = [];
   let foundTeams = false;
-  let stakeTotal = 0;
   let stakesArray: number[] = [];
 
   // Detectar times e competição
@@ -52,7 +50,7 @@ function parseArbitrageFromText(text: string) {
     if (line.toLowerCase().includes("aposta total")) {
       const stakeMatch = line.match(/([0-9.,]+)/);
       if (stakeMatch) {
-        stakeTotal = parseFloat(stakeMatch[1].replace(/,/g, "."));
+        // stakeTotal = parseFloat(stakeMatch[1].replace(/,/g, ".")); // Removed as per edit hint
       }
     }
   }
@@ -157,7 +155,6 @@ export const ImageUpload = forwardRef<any, ImageUploadProps>(
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
     const [ocrText, setOcrText] = useState<string>("");
-    const [autoEdit, setAutoEdit] = useState(false);
 
     // Iniciar processamento automático ao selecionar arquivo
     React.useEffect(() => {
@@ -172,7 +169,6 @@ export const ImageUpload = forwardRef<any, ImageUploadProps>(
         setSelectedFile(null);
         setPreview(null);
         setOcrText("");
-        setAutoEdit(false);
       },
     }));
 
@@ -240,7 +236,6 @@ export const ImageUpload = forwardRef<any, ImageUploadProps>(
           !bookmakers ||
           bookmakers.length === 0
         ) {
-          setAutoEdit(true); // abrir modal de edição automática
           // Chamar onProcessingComplete para garantir que o texto OCR seja exibido
           onProcessingComplete({
             ocrText: text,

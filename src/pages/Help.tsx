@@ -22,7 +22,7 @@ import {
   ToastProvider,
   ToastViewport,
   ToastClose,
-} from "../components/ui/toast";
+} from "../components/ui/Toast";
 import { TooltipProvider } from "../components/ui/tooltip";
 import { Input } from "@/components/ui/Input";
 

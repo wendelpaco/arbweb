@@ -1,18 +1,15 @@
 import React, { useState } from "react";
 import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
-import { Input } from "../ui/input";
 import { ArbitrageData } from "../../types";
 import {
-  formatCurrency,
   formatPercentage,
-  formatDate,
-  formatDateShort,
   formatRelativeTime,
   formatProfit,
   formatROI,
 } from "../../utils/formatters";
-import { Search, Filter, MoreVertical, Eye, Trash2, Edit } from "lucide-react";
+import { Search, Filter, Eye, Trash2, Edit } from "lucide-react";
+import { Input } from "../ui/Input";
 
 interface ArbitrageTableProps {
   arbitrages: ArbitrageData[];

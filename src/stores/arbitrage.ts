@@ -40,6 +40,13 @@ export const useArbitrageStore = create<ArbitrageState>()(
         profitByPeriod: [],
         bookmakerDistribution: [],
         sportDistribution: [],
+        totalStaked: 0,
+        profitToday: 0,
+        profitWeek: 0,
+        profitMonth: 0,
+        stakedToday: 0,
+        stakedWeek: 0,
+        stakedMonth: 0,
       },
       isLoading: false,
       error: null,
@@ -89,6 +96,13 @@ export const useArbitrageStore = create<ArbitrageState>()(
             profitByPeriod: [],
             bookmakerDistribution: [],
             sportDistribution: [],
+            totalStaked: 0,
+            profitToday: 0,
+            profitWeek: 0,
+            profitMonth: 0,
+            stakedToday: 0,
+            stakedWeek: 0,
+            stakedMonth: 0,
           },
           error: null,
         });
@@ -109,6 +123,13 @@ export const useArbitrageStore = create<ArbitrageState>()(
               profitByPeriod: [],
               bookmakerDistribution: [],
               sportDistribution: [],
+              totalStaked: 0,
+              profitToday: 0,
+              profitWeek: 0,
+              profitMonth: 0,
+              stakedToday: 0,
+              stakedWeek: 0,
+              stakedMonth: 0,
             },
           });
           return;
@@ -205,6 +226,46 @@ export const useArbitrageStore = create<ArbitrageState>()(
           })
         );
 
+        // Calcular valor total apostado
+        const totalStaked = arbitrages.reduce(
+          (sum, arb) => sum + (arb.metrics?.totalStake ?? 0),
+          0
+        );
+
+        // Calcular lucro e valor apostado por dia, semana, mês
+        const now = new Date();
+        const startOfToday = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate()
+        );
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        let profitToday = 0,
+          profitWeek = 0,
+          profitMonth = 0;
+        let stakedToday = 0,
+          stakedWeek = 0,
+          stakedMonth = 0;
+        arbitrages.forEach((arb) => {
+          const ts = new Date(arb.timestamp);
+          if (ts >= startOfToday) {
+            profitToday += arb.metrics?.totalProfit ?? 0;
+            stakedToday += arb.metrics?.totalStake ?? 0;
+          }
+          if (ts >= startOfWeek) {
+            profitWeek += arb.metrics?.totalProfit ?? 0;
+            stakedWeek += arb.metrics?.totalStake ?? 0;
+          }
+          if (ts >= startOfMonth) {
+            profitMonth += arb.metrics?.totalProfit ?? 0;
+            stakedMonth += arb.metrics?.totalStake ?? 0;
+          }
+        });
+
         set({
           dashboardMetrics: {
             totalProfit,
@@ -216,6 +277,13 @@ export const useArbitrageStore = create<ArbitrageState>()(
             profitByPeriod: profitByPeriodArray,
             bookmakerDistribution,
             sportDistribution,
+            totalStaked,
+            profitToday,
+            profitWeek,
+            profitMonth,
+            stakedToday,
+            stakedWeek,
+            stakedMonth,
           },
         });
       },

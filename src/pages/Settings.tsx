@@ -6,14 +6,12 @@ import { useArbitrageStore } from "../stores/arbitrage";
 import { useUIStore } from "../stores/ui";
 import { initializeSampleData } from "../utils/sampleData";
 import {
-  Settings as SettingsIcon,
   User,
   Bell,
   Shield,
   Database,
   Palette,
   Globe,
-  Save,
   Eye,
   EyeOff,
   Trash2,
@@ -31,7 +29,7 @@ import {
   ToastProvider,
   ToastViewport,
   ToastClose,
-} from "../components/ui/toast";
+} from "../components/ui/Toast";
 import { TooltipProvider } from "../components/ui/tooltip";
 import {
   Dialog,
@@ -81,7 +79,7 @@ function ProfileForm() {
     "Entusiasta de arbitragem esportiva com foco em futebol e basquete."
   );
   const [photo, setPhoto] = useState<string | null>(null);
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  // const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -93,7 +91,7 @@ function ProfileForm() {
       file.size <= 2 * 1024 * 1024 &&
       ["image/jpeg", "image/png", "image/gif"].includes(file.type)
     ) {
-      setPhotoFile(file);
+      // setPhotoFile(file);
       const reader = new FileReader();
       reader.onload = (ev) => setPhoto(ev.target?.result as string);
       reader.readAsDataURL(file);
@@ -655,10 +653,10 @@ function AppearanceForm({ theme, setTheme, debugOcr, setDebugOcr }: any) {
 
 export const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState("profile");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // const [showPassword, setShowPassword] = useState(false);
+  // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const [toastMsg, setToastMsg] = useState("");
+  const [toastMsg] = useState("");
 
   const tabs = [
     { id: "profile", label: "Perfil", icon: <User className="w-4 h-4" /> },
@@ -718,58 +716,58 @@ export const Settings: React.FC = () => {
     },
   ];
 
-  const securitySettings = [
-    {
-      id: "2fa",
-      title: "Autenticação de Dois Fatores",
-      description: "Adicione uma camada extra de segurança",
-      enabled: false,
-    },
-    {
-      id: "session",
-      title: "Sessões Ativas",
-      description: "Gerencie suas sessões ativas",
-      enabled: true,
-    },
-    {
-      id: "password",
-      title: "Alterar Senha",
-      description: "Atualize sua senha regularmente",
-      enabled: true,
-    },
-  ];
+  // const securitySettings = [
+  //   {
+  //     id: "2fa",
+  //     title: "Autenticação de Dois Fatores",
+  //     description: "Adicione uma camada extra de segurança",
+  //     enabled: false,
+  //   },
+  //   {
+  //     id: "session",
+  //     title: "Sessões Ativas",
+  //     description: "Gerencie suas sessões ativas",
+  //     enabled: true,
+  //   },
+  //   {
+  //     id: "password",
+  //     title: "Alterar Senha",
+  //     description: "Atualize sua senha regularmente",
+  //     enabled: true,
+  //   },
+  // ];
 
-  const appearanceSettings = [
-    {
-      id: "theme",
-      title: "Tema",
-      description: "Escolha entre tema claro ou escuro",
-      options: ["Claro", "Escuro", "Automático"],
-      current: "Automático",
-    },
-    {
-      id: "language",
-      title: "Idioma",
-      description: "Selecione o idioma da interface",
-      options: ["Português", "English", "Español"],
-      current: "Português",
-    },
-    {
-      id: "timezone",
-      title: "Fuso Horário",
-      description: "Configure seu fuso horário local",
-      options: ["UTC-3 (Brasília)", "UTC-4 (Manaus)", "UTC-5 (Acre)"],
-      current: "UTC-3 (Brasília)",
-    },
-  ];
+  // const appearanceSettings = [
+  //   {
+  //     id: "theme",
+  //     title: "Tema",
+  //     description: "Escolha entre tema claro ou escuro",
+  //     options: ["Claro", "Escuro", "Automático"],
+  //     current: "Automático",
+  //   },
+  //   {
+  //     id: "language",
+  //     title: "Idioma",
+  //     description: "Selecione o idioma da interface",
+  //     options: ["Português", "English", "Español"],
+  //     current: "Português",
+  //   },
+  //   {
+  //     id: "timezone",
+  //     title: "Fuso Horário",
+  //     description: "Configure seu fuso horário local",
+  //     options: ["UTC-3 (Brasília)", "UTC-4 (Manaus)", "UTC-5 (Acre)"],
+  //     current: "UTC-3 (Brasília)",
+  //   },
+  // ];
 
   const { debugOcr, setDebugOcr, theme, setTheme } = useUIStore();
 
-  const handleSaveSettings = () => {
-    setToastMsg("Configurações salvas com sucesso!");
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 2000);
-  };
+  // const handleSaveSettings = () => {
+  //   setToastMsg("Configurações salvas com sucesso!");
+  //   setShowToast(true);
+  //   setTimeout(() => setShowToast(false), 2000);
+  // };
 
   const { clearAllData } = useArbitrageStore();
 

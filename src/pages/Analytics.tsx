@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
-import { Label } from "../components/ui/Label";
 import { Input } from "../components/ui/Input";
 import { MetricCard } from "../components/dashboard/MetricsCard";
 import { ProfitChart } from "../components/charts/ProfitChart";
 import { DistributionChart } from "../components/charts/DistributionChart";
-import { useArbitrageStore } from "../stores/arbitrage";
+// import { useArbitrageStore } from "../stores/arbitrage";
 import {
   TrendingUp,
   TrendingDown,
@@ -19,6 +18,7 @@ import {
 import { formatCurrency, formatPercentage } from "../utils/formatters";
 import { useToast } from "../hooks/use-toast";
 import { CheckCircle2 } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 export const Analytics: React.FC = () => {
   const { toast } = useToast();

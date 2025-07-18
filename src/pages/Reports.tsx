@@ -1,32 +1,27 @@
 import React, { useState } from "react";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
-import { Input } from "../components/ui/Input";
 import { ProfitChart } from "../components/charts/ProfitChart";
 import { DistributionChart } from "../components/charts/DistributionChart";
 import {
   FileText,
   Download,
-  Calendar,
-  Filter,
   BarChart3,
   TrendingUp,
   PieChart,
-  Printer,
   Share2,
   Eye,
-  Settings,
   X,
   CheckCircle,
 } from "lucide-react";
-import { formatCurrency, formatPercentage } from "../utils/formatters";
+import { formatPercentage } from "../utils/formatters";
 import { MetricCard } from "../components/dashboard/MetricsCard";
 import {
   Toast,
   ToastProvider,
   ToastViewport,
   ToastClose,
-} from "../components/ui/toast";
+} from "../components/ui/Toast";
 import {
   Tooltip,
   TooltipTrigger,

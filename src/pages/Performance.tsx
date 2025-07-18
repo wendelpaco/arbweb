@@ -6,16 +6,10 @@ import { ProfitChart } from "../components/charts/ProfitChart";
 import { DistributionChart } from "../components/charts/DistributionChart";
 import {
   TrendingUp,
-  TrendingDown,
   Target,
   Award,
-  Clock,
   BarChart3,
-  PieChart,
-  Calendar,
   Filter,
-  Download,
-  RefreshCw,
   Zap,
   Star,
 } from "lucide-react";

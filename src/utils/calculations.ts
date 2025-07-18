@@ -127,7 +127,7 @@ export const validateAndCalculateArbitrage = (bookmakers: Bookmaker[]) => {
   }));
   const totalStake = safeBookmakers.reduce((sum, bm) => sum + bm.stake, 0);
   const profits = safeBookmakers.map((bm) => bm.stake * bm.odds - totalStake);
-  const totalProfit = Math.min(...profits);
+  // const totalProfit = Math.min(...profits);
   const metrics = calculateMetrics(safeBookmakers);
   const allPositive = profits.every((p) => p > 0);
   if (!allPositive) {

@@ -3,21 +3,9 @@ import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { ArbitrageTable } from "../components/dashboard/ArbitrageTable";
-import { useArbitrageStore } from "../stores/arbitrage";
+// import { useArbitrageStore } from "../stores/arbitrage";
 import { ArbitrageData } from "../types";
-import {
-  Calendar,
-  Filter,
-  Download,
-  Search,
-  Clock,
-  TrendingUp,
-  TrendingDown,
-  Eye,
-  FileText,
-  X,
-  CheckCircle,
-} from "lucide-react";
+import { Search, Eye, X, CheckCircle } from "lucide-react";
 import {
   formatCurrency,
   formatPercentage,
@@ -37,7 +25,7 @@ import {
   ToastProvider,
   ToastViewport,
   ToastClose,
-} from "../components/ui/toast";
+} from "../components/ui/Toast";
 import {
   Tooltip,
   TooltipTrigger,
@@ -46,7 +34,7 @@ import {
 } from "../components/ui/tooltip";
 
 export const History: React.FC = () => {
-  const { arbitrages } = useArbitrageStore();
+  // const { arbitrages } = useArbitrageStore();
   const [selectedDateRange, setSelectedDateRange] = useState("all");
   const [selectedSport, setSelectedSport] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
@@ -176,11 +164,13 @@ export const History: React.FC = () => {
   };
 
   const handleEditArbitrage = (arbitrage: ArbitrageData) => {
+    console.log(arbitrage);
     setToastMsg("Função de edição em breve!");
     setShowToast(true);
   };
 
   const handleDeleteArbitrage = (id: string) => {
+    console.log(id);
     setToastMsg("Função de exclusão em breve!");
     setShowToast(true);
   };
@@ -284,18 +274,8 @@ export const History: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex gap-2 mt-4 md:mt-0">
-                  <Button
-                    variant="outline"
-                    leftIcon={<Download className="w-4 h-4" />}
-                  >
-                    Exportar CSV
-                  </Button>
-                  <Button
-                    variant="outline"
-                    leftIcon={<FileText className="w-4 h-4" />}
-                  >
-                    Relatório PDF
-                  </Button>
+                  <Button variant="outline">Exportar CSV</Button>
+                  <Button variant="outline">Relatório PDF</Button>
                 </div>
               </div>
             </Card>

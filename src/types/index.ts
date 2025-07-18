@@ -65,18 +65,14 @@ export interface DashboardMetrics {
   successRate: number;
   bestBookmaker: string;
   mostProfitableSport: string;
-  profitByPeriod: {
-    date: string;
-    profit: number;
-  }[];
-  bookmakerDistribution: {
-    name: string;
-    count: number;
-    totalProfit: number;
-  }[];
-  sportDistribution: {
-    sport: string;
-    count: number;
-    totalProfit: number;
-  }[];
+  profitByPeriod: { date: string; profit: number }[];
+  bookmakerDistribution: { name: string; count: number; totalProfit: number }[];
+  sportDistribution: { sport: string; count: number; totalProfit: number }[];
+  totalStaked: number;
+  profitToday: number;
+  profitWeek: number;
+  profitMonth: number;
+  stakedToday: number;
+  stakedWeek: number;
+  stakedMonth: number;
 }
