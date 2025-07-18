@@ -22,46 +22,59 @@ export async function extractArbitrageWithOpenAI(
   ]
 }
 
-- Os times geralmente aparecem juntos, separados por “—” ou “-” (ex: FC Libertad — Manta FC).
-- A competição geralmente aparece após “Futebol /”.
-- Odds, stake e lucro podem estar juntos na mesma linha, e números podem vir com espaços ou símbolos estranhos (ex: “6 586047 — BRL” significa “5860.47 BRL”).
-- Corrija números quebrados e converta para decimal.
-- Se algum campo não estiver presente, deixe vazio ou zero.
-- Não invente dados.
+Regras e instruções importantes:
+- Extraia todas as linhas de apostas, mesmo que sejam 2, 3 ou mais.
+- Odds podem aparecer como 1.875, 1.820, 2.950, etc.
+- Stakes podem aparecer coladas (ex: 175848 → 1758.48, 84542 → 845.42, 59610 → 596.10). Sempre que encontrar um número de stake com 5 ou mais dígitos e sem ponto, insira o ponto duas casas antes do final.
+- Se houver múltiplas possibilidades para stake colada, escolha a que, somada às outras stakes, mais se aproxima do valor total extraído (“Aposta total”).
+- Lucro pode aparecer ao final da linha.
+- Ignore caracteres estranhos, símbolos ou letras entre odds, stake e lucro.
+- Os times geralmente aparecem juntos, separados por “—” ou “-”.
+- A competição geralmente aparece após “/”.
+- Odds e stakes nunca devem ser absurdamente altos (odds > 100, stake > 10.000).
+- Se não conseguir extrair algum valor, retorne 0 e explique no campo "erro".
 - Ignore linhas irrelevantes.
 - Retorne apenas o JSON, sem explicações.
 
 Exemplo de texto extraído:
-"""
-FC Libertad — Manta FC 7.44%
-Futebol / Ecuador - Serie À
-SeuBet (BR) H1(—1.5) - escanteios 2.100 6139.53 BRL 893.01
-Blaze H2(+1.5) - escanteios 2.200 5860.47 BRL 893.03
-Aposta total: 12000
-"""
+Barracas Central — Independiente Rivadavia 3.04%
+ROI: 558.55%
+Futebol / Argentina Liga Profesional
+Chance Aposta DÉO cOê Lucro
+Bet365 (Fast) H2(0) - cartões 1.875 175848 BRL 97.15
+Betano (BR) H1(+0.5) - cartões 1.820 84542 BRL 97.14
+Betano (BR) 1-cartões 2.950 59610 BRL 97.16
+Aposta total: 3200 BRL
 
 Exemplo de saída:
 {
   "match": {
-    "team1": "FC Libertad",
-    "team2": "Manta FC",
+    "team1": "Barracas Central",
+    "team2": "Independiente Rivadavia",
     "sport": "Futebol",
-    "competition": "Ecuador - Serie A"
+    "competition": "Argentina Liga Profesional"
   },
   "bookmakers": [
     {
-      "name": "SeuBet (BR)",
-      "odds": 2.1,
-      "betType": "H1(-1.5) - escanteios",
-      "stake": 6139.53,
-      "profit": 893.01
+      "name": "Bet365 (Fast)",
+      "odds": 1.875,
+      "betType": "H2(0) - cartões",
+      "stake": 1758.48,
+      "profit": 97.15
     },
     {
-      "name": "Blaze",
-      "odds": 2.2,
-      "betType": "H2(+1.5) - escanteios",
-      "stake": 5860.47,
-      "profit": 893.03
+      "name": "Betano (BR)",
+      "odds": 1.82,
+      "betType": "H1(+0.5) - cartões",
+      "stake": 845.42,
+      "profit": 97.14
+    },
+    {
+      "name": "Betano (BR)",
+      "odds": 2.95,
+      "betType": "1-cartões",
+      "stake": 596.10,
+      "profit": 97.16
     }
   ]
 }
@@ -99,7 +112,96 @@ ${ocrText}
   const data = await response.json();
   const content = data.choices?.[0]?.message?.content;
   try {
-    return JSON.parse(content);
+    const result = JSON.parse(content);
+    // Pós-processamento para odds: garantir que odds como '2.891' não virem 1.2891
+    if (result.bookmakers && Array.isArray(result.bookmakers)) {
+      result.bookmakers = result.bookmakers.map((bm: any) => {
+        if (typeof bm.odds === "string") {
+          let oddsStr = bm.odds.trim().replace(/,/g, ".").replace(/^0+/, "");
+          if (/^1\.\d{3,}$/.test(oddsStr)) {
+            const match = oddsStr.match(/^1\.(\d{3,})$/);
+            if (match) {
+              oddsStr = match[1][0] + "." + match[1].slice(1);
+            }
+          }
+          bm.odds = parseFloat(oddsStr);
+        }
+        return bm;
+      });
+    }
+    // Pós-processamento para stakes colados: corrigir para casar com o total extraído
+    if (result.bookmakers && Array.isArray(result.bookmakers)) {
+      // Extrair total
+      let totalStake = 0;
+      if (result.metrics && result.metrics.totalStake) {
+        totalStake = result.metrics.totalStake;
+      } else if (result.bookmakers.length > 0) {
+        totalStake = result.bookmakers.reduce(
+          (a: number, b: any) =>
+            a + (typeof b.stake === "number" ? b.stake : 0),
+          0
+        );
+      }
+      // Função auxiliar para splits possíveis
+      function getPossibleStakes(stakeRaw: number | string): number[] {
+        const raw = String(stakeRaw).replace(/[^0-9]/g, "");
+        const results: number[] = [];
+        for (let i = 2; i <= Math.min(6, raw.length - 1); i++) {
+          const stake = parseFloat(raw.slice(0, -i) + "." + raw.slice(-i));
+          if (!isNaN(stake) && stake > 0 && stake < 10000) results.push(stake);
+        }
+        return results.length ? results : [parseFloat(raw)];
+      }
+      // Gerar todas as combinações possíveis
+      function getAllStakeCombinations(bookmakers: any[]): number[][] {
+        if (bookmakers.length === 0) return [[]];
+        const [first, ...rest] = bookmakers;
+        let options: number[] = [];
+        // Só aplicar splits se for inteiro grande e sem ponto
+        if (
+          (typeof first.stake === "number" &&
+            first.stake >= 10000 &&
+            Number.isInteger(first.stake)) ||
+          (typeof first.stake === "string" &&
+            !String(first.stake).includes(".") &&
+            parseInt(first.stake) >= 10000)
+        ) {
+          options = getPossibleStakes(first.stake);
+        } else {
+          options = [
+            typeof first.stake === "number"
+              ? first.stake
+              : parseFloat(first.stake),
+          ];
+        }
+        const restComb: number[][] = getAllStakeCombinations(rest);
+        const result: number[][] = [];
+        for (const opt of options) {
+          for (const comb of restComb) {
+            result.push([opt, ...comb]);
+          }
+        }
+        return result;
+      }
+      let bestCombo: number[] | null = null;
+      let minDiff = Infinity;
+      const allComb: number[][] = getAllStakeCombinations(result.bookmakers);
+      for (const combo of allComb) {
+        const sum = combo.reduce((a: number, b: number) => a + b, 0);
+        const diff = Math.abs(sum - totalStake);
+        if (diff < minDiff) {
+          minDiff = diff;
+          bestCombo = combo;
+        }
+      }
+      if (bestCombo) {
+        result.bookmakers = result.bookmakers.map((bm: any, i: number) => ({
+          ...bm,
+          stake: bestCombo![i],
+        }));
+      }
+    }
+    return result;
   } catch (e) {
     throw new Error("Falha ao interpretar resposta da OpenAI: " + content);
   }

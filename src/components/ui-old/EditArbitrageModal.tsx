@@ -12,9 +12,8 @@ import {
 } from "./dialog";
 import { validateAndCalculateArbitrage } from "../../utils/calculations";
 import { X } from "lucide-react";
+import { Label } from "./Label";
 import { Input } from "./Input";
-import { formatOdds } from "../../utils/formatters";
-import { Label } from "@radix-ui/react-label";
 
 function formatNumberInput(value: string | number) {
   if (typeof value === "number") return value;
@@ -101,10 +100,10 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl p-8 rounded-2xl shadow-2xl bg-white dark:bg-zinc-950 animate-in fade-in-0 scale-in-95">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+          <DialogTitle className="text-2xl font-bold">
             Editar Arbitragem
           </DialogTitle>
-          <DialogDescription className="text-zinc-500 dark:text-zinc-400">
+          <DialogDescription className="text-zinc-500">
             Edite os dados da arbitragem e salve as alterações.
           </DialogDescription>
         </DialogHeader>
@@ -116,7 +115,6 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
               value={match.team1}
               onChange={(e) => handleMatchChange("team1", e.target.value)}
               placeholder="Time 1"
-              className="rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 shadow focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all"
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -126,7 +124,6 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
               value={match.team2}
               onChange={(e) => handleMatchChange("team2", e.target.value)}
               placeholder="Time 2"
-              className="rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 shadow focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all"
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -136,7 +133,6 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
               value={match.sport}
               onChange={(e) => handleMatchChange("sport", e.target.value)}
               placeholder="Esporte"
-              className="rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 shadow focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all"
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -146,24 +142,18 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
               value={match.competition}
               onChange={(e) => handleMatchChange("competition", e.target.value)}
               placeholder="Competição"
-              className="rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 shadow focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all"
             />
           </div>
         </div>
-        <h3 className="text-lg font-semibold mb-2 flex items-center justify-between text-zinc-900 dark:text-zinc-100">
+        <h3 className="text-lg font-semibold mb-2 flex items-center justify-between">
           Casas de Apostas
-          <Button
-            size="lg"
-            variant="default"
-            className="rounded-xl shadow-premium px-4 py-2"
-            onClick={handleAddBookmaker}
-          >
+          <Button size="sm" variant="outline" onClick={handleAddBookmaker}>
             + Adicionar Linha
           </Button>
         </h3>
         {bookmakers.length > 1 && (
           <div
-            className={`mb-4 p-3 rounded-xl flex flex-wrap items-center gap-4 ${
+            className={`mb-4 p-3 rounded flex items-center space-x-3 ${
               isLucrativa
                 ? "bg-green-50 border border-green-200"
                 : "bg-red-50 border border-red-200"
@@ -180,9 +170,7 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
             </span>
             <span className="text-sm text-zinc-700 dark:text-zinc-200">
               Percentual:{" "}
-              <b>
-                {(arbitrageInfo.metrics.arbitragePercentage - 100).toFixed(2)}%
-              </b>
+              <b>{arbitrageInfo.metrics.arbitragePercentage.toFixed(2)}%</b>
             </span>
             <span className="text-sm text-zinc-700 dark:text-zinc-200">
               Lucro Garantido:{" "}
@@ -196,37 +184,33 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
           </div>
         )}
         <div className="overflow-x-auto mb-6">
-          <table className="w-full text-sm rounded-xl overflow-hidden">
-            <thead className="bg-zinc-100 dark:bg-zinc-800 sticky top-0 z-10">
-              <tr className="text-zinc-600 dark:text-zinc-300">
-                <th className="px-2 py-2 text-left">Casa</th>
-                <th className="px-2 py-2 text-left">Odds</th>
-                <th className="px-2 py-2 text-left">Tipo</th>
-                <th className="px-2 py-2 text-left">Stake</th>
-                <th className="px-2 py-2 text-left">Payout</th>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-zinc-600">
+                <th className="px-2 py-1 text-left">Casa</th>
+                <th className="px-2 py-1 text-left">Odds</th>
+                <th className="px-2 py-1 text-left">Tipo</th>
+                <th className="px-2 py-1 text-left">Stake</th>
+                <th className="px-2 py-1 text-left">Payout</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               {bookmakers.map((bm, i) => (
-                <tr
-                  key={i}
-                  className="border-b last:border-b-0 border-zinc-100 dark:border-zinc-800"
-                >
-                  <td className="px-2 py-2">
+                <tr key={i} className="border-b last:border-b-0">
+                  <td className="px-2 py-1">
                     <Input
                       value={bm.name}
                       onChange={(e) =>
                         handleBookmakerChange(i, "name", e.target.value)
                       }
                       placeholder="Casa"
-                      className="rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 shadow focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all"
                     />
                   </td>
-                  <td className="px-2 py-2">
+                  <td className="px-2 py-1">
                     <Input
                       type="text"
-                      value={formatOdds(bm.odds)}
+                      value={bm.odds}
                       onChange={(e) =>
                         handleBookmakerChange(
                           i,
@@ -236,20 +220,18 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
                       }
                       placeholder="Odds"
                       inputMode="decimal"
-                      className="rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 shadow focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all"
                     />
                   </td>
-                  <td className="px-2 py-2">
+                  <td className="px-2 py-1">
                     <Input
                       value={bm.betType}
                       onChange={(e) =>
                         handleBookmakerChange(i, "betType", e.target.value)
                       }
                       placeholder="Tipo"
-                      className="rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 shadow focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all"
                     />
                   </td>
-                  <td className="px-2 py-2">
+                  <td className="px-2 py-1">
                     <Input
                       type="text"
                       value={bm.stake}
@@ -262,10 +244,9 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
                       }
                       placeholder="Stake"
                       inputMode="decimal"
-                      className="rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 shadow focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all"
                     />
                   </td>
-                  <td className="px-2 py-2">
+                  <td className="px-2 py-1">
                     <Input
                       type="text"
                       value={bm.profit}
@@ -278,10 +259,9 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
                       }
                       placeholder="Payout"
                       inputMode="decimal"
-                      className="rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 shadow focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all"
                     />
                   </td>
-                  <td className="px-2 py-2 text-center align-middle">
+                  <td className="px-2 py-1 text-center align-middle">
                     {bookmakers.length > 2 && (
                       <button
                         type="button"
@@ -299,19 +279,11 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
             </tbody>
           </table>
         </div>
-        <DialogFooter className="mt-8 flex gap-4 justify-end">
-          <Button
-            variant="outline"
-            className="rounded-xl px-8 py-2 text-base font-medium"
-            onClick={onClose}
-          >
+        <DialogFooter className="mt-8 flex gap-4">
+          <Button variant="outline" onClick={onClose}>
             Cancelar
           </Button>
-          <Button
-            variant="default"
-            className="rounded-xl px-8 py-2 text-base font-medium"
-            onClick={handleSave}
-          >
+          <Button variant="default" onClick={handleSave}>
             Salvar
           </Button>
         </DialogFooter>

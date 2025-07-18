@@ -15,12 +15,35 @@ import {
   TrendingDown,
   Eye,
   FileText,
+  X,
+  CheckCircle,
 } from "lucide-react";
 import {
   formatCurrency,
   formatPercentage,
   formatDate,
 } from "../utils/formatters";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "../components/ui/dialog";
+import {
+  Toast,
+  ToastProvider,
+  ToastViewport,
+  ToastClose,
+} from "../components/ui/toast";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "../components/ui/tooltip";
 
 export const History: React.FC = () => {
   const { arbitrages } = useArbitrageStore();
@@ -28,6 +51,11 @@ export const History: React.FC = () => {
   const [selectedSport, setSelectedSport] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedArbitrage, setSelectedArbitrage] =
+    useState<ArbitrageData | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
 
   // Dados simulados para histórico
   const historicalData: ArbitrageData[] = [
@@ -143,15 +171,18 @@ export const History: React.FC = () => {
   ];
 
   const handleViewArbitrage = (arbitrage: ArbitrageData) => {
-    console.log("View arbitrage:", arbitrage);
+    setSelectedArbitrage(arbitrage);
+    setViewModalOpen(true);
   };
 
   const handleEditArbitrage = (arbitrage: ArbitrageData) => {
-    console.log("Edit arbitrage:", arbitrage);
+    setToastMsg("Função de edição em breve!");
+    setShowToast(true);
   };
 
   const handleDeleteArbitrage = (id: string) => {
-    console.log("Delete arbitrage:", id);
+    setToastMsg("Função de exclusão em breve!");
+    setShowToast(true);
   };
 
   const totalProfit = historicalData.reduce(
@@ -164,232 +195,391 @@ export const History: React.FC = () => {
     totalArbitrages;
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Histórico</h1>
-          <p className="text-gray-600">Timeline completo de arbitragens</p>
-        </div>
-        <div className="flex items-center space-x-3">
-          <Button variant="outline" leftIcon={<Download className="w-4 h-4" />}>
-            Exportar CSV
-          </Button>
-          <Button variant="outline" leftIcon={<FileText className="w-4 h-4" />}>
-            Relatório PDF
-          </Button>
-        </div>
-      </div>
-
-      {/* Filtros */}
-      <Card>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Filtros</h3>
-          <Filter className="w-5 h-5 text-gray-400" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Período
-            </label>
-            <select
-              value={selectedDateRange}
-              onChange={(e) => setSelectedDateRange(e.target.value)}
-              className="input-field"
+    <TooltipProvider>
+      <ToastProvider>
+        <section className="min-h-screen w-full bg-zinc-50 dark:bg-zinc-950 py-2">
+          <div className="max-w-screen-xl mx-auto px-4 space-y-10">
+            <h1 className="text-3xl font-bold mb-4 text-zinc-900 dark:text-zinc-100">
+              Histórico
+            </h1>
+            <Toast
+              open={showToast}
+              onOpenChange={setShowToast}
+              className="bg-green-600 text-white rounded-xl shadow-lg flex items-center gap-3 px-6 py-4 animate-in fade-in-0 slide-in-from-top-6"
             >
-              {dateRanges.map((range) => (
-                <option key={range.value} value={range.value}>
-                  {range.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Esporte
-            </label>
-            <select
-              value={selectedSport}
-              onChange={(e) => setSelectedSport(e.target.value)}
-              className="input-field"
-            >
-              {sports.map((sport) => (
-                <option key={sport.value} value={sport.value}>
-                  {sport.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Status
-            </label>
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="input-field"
-            >
-              {statuses.map((status) => (
-                <option key={status.value} value={status.value}>
-                  {status.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Buscar
-            </label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                placeholder="Buscar arbitragens..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Resumo */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Lucro Total</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {formatCurrency(totalProfit)}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-green-600" />
-            </div>
-          </div>
-        </Card>
-        <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">
-                Total de Arbitragens
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {totalArbitrages}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Clock className="w-6 h-6 text-blue-600" />
-            </div>
-          </div>
-        </Card>
-        <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">ROI Médio</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {formatPercentage(averageRoi)}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <TrendingDown className="w-6 h-6 text-purple-600" />
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Timeline */}
-      <Card>
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Timeline de Arbitragens
-          </h3>
-          <p className="text-sm text-gray-500">
-            Histórico cronológico de todas as arbitragens
-          </p>
-        </div>
-
-        <div className="space-y-4">
-          {historicalData.map((arbitrage, index) => (
-            <div
-              key={arbitrage.id}
-              className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                  <span className="text-primary-600 font-medium text-sm">
-                    {index + 1}
-                  </span>
-                </div>
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <h4 className="font-medium text-gray-900">
-                      {arbitrage.match.team1} vs {arbitrage.match.team2}
-                    </h4>
-                    <p className="text-sm text-gray-500">
-                      {arbitrage.match.competition} • {arbitrage.match.sport}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p
-                      className={`font-medium ${
-                        arbitrage.metrics.totalProfit >= 0
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
+              <CheckCircle className="w-5 h-5 text-white" />
+              <span className="font-medium">{toastMsg}</span>
+              <ToastClose asChild>
+                <button className="ml-auto p-1 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-white">
+                  <X className="w-4 h-4" />
+                </button>
+              </ToastClose>
+            </Toast>
+            <ToastViewport className="fixed top-6 right-6 z-[100]" />
+            {/* Filtros */}
+            <Card className="p-8 rounded-2xl shadow-md bg-white dark:bg-zinc-900">
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+                <div className="flex flex-col gap-2 md:flex-row md:gap-6 w-full">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-200 mb-1">
+                      Período
+                    </label>
+                    <select
+                      value={selectedDateRange}
+                      onChange={(e) => setSelectedDateRange(e.target.value)}
+                      className="h-10 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-base shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
                     >
-                      {formatCurrency(arbitrage.metrics.totalProfit)}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {formatDate(arbitrage.timestamp)}
-                    </p>
+                      {dateRanges.map((range) => (
+                        <option key={range.value} value={range.value}>
+                          {range.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-200 mb-1">
+                      Esporte
+                    </label>
+                    <select
+                      value={selectedSport}
+                      onChange={(e) => setSelectedSport(e.target.value)}
+                      className="h-10 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-base shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+                    >
+                      {sports.map((sport) => (
+                        <option key={sport.value} value={sport.value}>
+                          {sport.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-200 mb-1">
+                      Status
+                    </label>
+                    <select
+                      value={selectedStatus}
+                      onChange={(e) => setSelectedStatus(e.target.value)}
+                      className="h-10 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-base shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+                    >
+                      {statuses.map((status) => (
+                        <option key={status.value} value={status.value}>
+                          {status.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-2 w-full md:w-64">
+                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-200 mb-1">
+                      Buscar
+                    </label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                      <Input
+                        placeholder="Buscar arbitragens..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-4 text-sm text-gray-600">
-                  <span>ROI: {formatPercentage(arbitrage.metrics.roi)}</span>
-                  <span>•</span>
-                  <span>{arbitrage.bookmakers.length} casas</span>
-                  <span>•</span>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      arbitrage.status === "processed"
-                        ? "bg-green-100 text-green-800"
-                        : arbitrage.status === "pending"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
+                <div className="flex gap-2 mt-4 md:mt-0">
+                  <Button
+                    variant="outline"
+                    leftIcon={<Download className="w-4 h-4" />}
                   >
-                    {arbitrage.status === "processed"
-                      ? "Processado"
-                      : arbitrage.status === "pending"
-                      ? "Processando"
-                      : "Erro"}
-                  </span>
+                    Exportar CSV
+                  </Button>
+                  <Button
+                    variant="outline"
+                    leftIcon={<FileText className="w-4 h-4" />}
+                  >
+                    Relatório PDF
+                  </Button>
                 </div>
               </div>
-              <div className="flex-shrink-0">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleViewArbitrage(arbitrage)}
-                >
-                  <Eye className="w-4 h-4" />
-                </Button>
-              </div>
+            </Card>
+            {/* Cards de resumo */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+              <Card className="p-6 flex flex-col gap-2 bg-white dark:bg-zinc-900">
+                <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                  Lucro Total
+                </span>
+                <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+                  {formatCurrency(totalProfit)}
+                </span>
+              </Card>
+              <Card className="p-6 flex flex-col gap-2 bg-white dark:bg-zinc-900">
+                <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                  Total de Arbitragens
+                </span>
+                <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+                  {totalArbitrages}
+                </span>
+              </Card>
+              <Card className="p-6 flex flex-col gap-2 bg-white dark:bg-zinc-900">
+                <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                  ROI Médio
+                </span>
+                <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+                  {formatPercentage(averageRoi)}
+                </span>
+              </Card>
             </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* Tabela Detalhada */}
-      <ArbitrageTable
-        arbitrages={historicalData}
-        onView={handleViewArbitrage}
-        onEdit={handleEditArbitrage}
-        onDelete={handleDeleteArbitrage}
-      />
-    </div>
+            {/* Timeline modernizada */}
+            <Card className="p-8 rounded-2xl shadow-md bg-white dark:bg-zinc-900">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                  Timeline de Arbitragens
+                </h3>
+                <p className="text-sm text-zinc-500">
+                  Histórico cronológico de todas as arbitragens
+                </p>
+              </div>
+              <div className="space-y-4">
+                {historicalData.map((arbitrage, index) => (
+                  <div
+                    key={arbitrage.id}
+                    className="flex items-start space-x-4 p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+                  >
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center">
+                        <span className="text-primary-600 dark:text-primary-300 font-medium text-sm">
+                          {index + 1}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <h4 className="font-medium text-zinc-900 dark:text-zinc-100">
+                            {arbitrage.match.team1} vs {arbitrage.match.team2}
+                          </h4>
+                          <p className="text-sm text-zinc-500">
+                            {arbitrage.match.competition} •{" "}
+                            {arbitrage.match.sport}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p
+                            className={`font-medium ${
+                              arbitrage.metrics.totalProfit >= 0
+                                ? "text-green-600 dark:text-green-400"
+                                : "text-red-600 dark:text-red-400"
+                            }`}
+                          >
+                            {formatCurrency(arbitrage.metrics.totalProfit)}
+                          </p>
+                          <p className="text-sm text-zinc-500">
+                            {formatDate(arbitrage.timestamp)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm text-zinc-600 dark:text-zinc-400">
+                        <span>
+                          ROI: {formatPercentage(arbitrage.metrics.roi)}
+                        </span>
+                        <span>•</span>
+                        <span>{arbitrage.bookmakers.length} casas</span>
+                        <span>•</span>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            arbitrage.status === "processed"
+                              ? "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300"
+                              : arbitrage.status === "pending"
+                              ? "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300"
+                              : "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300"
+                          }`}
+                        >
+                          {arbitrage.status === "processed"
+                            ? "Processado"
+                            : arbitrage.status === "pending"
+                            ? "Processando"
+                            : "Erro"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleViewArbitrage(arbitrage)}
+                            className="focus-visible:ring-2 focus-visible:ring-primary-500"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">Ver detalhes</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+            {/* Tabela detalhada */}
+            <ArbitrageTable
+              arbitrages={historicalData}
+              onView={handleViewArbitrage}
+              onEdit={handleEditArbitrage}
+              onDelete={handleDeleteArbitrage}
+            />
+            {/* Modal de visualização detalhada */}
+            {viewModalOpen && selectedArbitrage && (
+              <Dialog open={viewModalOpen} onOpenChange={setViewModalOpen}>
+                <DialogContent className="max-w-2xl p-8 rounded-2xl shadow-2xl bg-white dark:bg-zinc-950 animate-in fade-in-0 scale-in-95">
+                  <DialogHeader>
+                    <DialogTitle className="text-2xl font-bold">
+                      Detalhes da Arbitragem
+                    </DialogTitle>
+                    <DialogDescription className="text-zinc-500">
+                      {selectedArbitrage.match?.team1} vs{" "}
+                      {selectedArbitrage.match?.team2} —{" "}
+                      {selectedArbitrage.match?.competition}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <span className="block text-xs text-zinc-500 mb-1">
+                        Esporte
+                      </span>
+                      <span className="inline-block px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-xs font-medium">
+                        {selectedArbitrage.match?.sport}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="block text-xs text-zinc-500 mb-1">
+                        Data
+                      </span>
+                      <span className="text-sm text-zinc-900 dark:text-zinc-100">
+                        {selectedArbitrage.timestamp
+                          ? formatDate(selectedArbitrage.timestamp)
+                          : "-"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="block text-xs text-zinc-500 mb-1">
+                        Status
+                      </span>
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${
+                          selectedArbitrage.status === "processed"
+                            ? "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300"
+                            : selectedArbitrage.status === "pending"
+                            ? "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300"
+                            : "bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300"
+                        }`}
+                      >
+                        {selectedArbitrage.status}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="block text-xs text-zinc-500 mb-1">
+                        ROI
+                      </span>
+                      <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                        {selectedArbitrage.metrics?.roi !== undefined
+                          ? Number(selectedArbitrage.metrics.roi).toFixed(2) +
+                            "%"
+                          : "-"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="block text-xs text-zinc-500 mb-1">
+                        Lucro Total
+                      </span>
+                      <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                        {selectedArbitrage.metrics?.totalProfit !== undefined
+                          ? formatCurrency(
+                              selectedArbitrage.metrics.totalProfit
+                            )
+                          : "-"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="block text-xs text-zinc-500 mb-1">
+                        Percentual Arbitragem
+                      </span>
+                      <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                        {selectedArbitrage.metrics?.arbitragePercentage !==
+                        undefined
+                          ? Number(
+                              selectedArbitrage.metrics.arbitragePercentage
+                            ).toFixed(2) + "%"
+                          : "-"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="block text-xs text-zinc-500 mb-1">
+                        Total Apostado
+                      </span>
+                      <span className="text-sm font-medium">
+                        {selectedArbitrage.metrics?.totalStake !== undefined
+                          ? formatCurrency(selectedArbitrage.metrics.totalStake)
+                          : "-"}
+                      </span>
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">
+                    Casas de Apostas
+                  </h3>
+                  <div className="overflow-x-auto mb-6">
+                    <table className="w-full text-sm rounded-xl overflow-hidden">
+                      <thead className="bg-zinc-100 dark:bg-zinc-800">
+                        <tr className="text-zinc-600">
+                          <th className="px-4 py-2 text-left">Casa</th>
+                          <th className="px-4 py-2 text-left">Odds</th>
+                          <th className="px-4 py-2 text-left">Tipo</th>
+                          <th className="px-4 py-2 text-left">Stake</th>
+                          <th className="px-4 py-2 text-left">Payout</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedArbitrage.bookmakers?.map(
+                          (bm: any, i: number) => (
+                            <tr key={i} className="border-b last:border-b-0">
+                              <td className="px-4 py-2">{bm.name}</td>
+                              <td className="px-4 py-2">
+                                {Number(bm.odds).toFixed(2)}
+                              </td>
+                              <td className="px-4 py-2">{bm.betType}</td>
+                              <td className="px-4 py-2">
+                                {Number(bm.stake).toLocaleString("pt-BR", {
+                                  maximumFractionDigits: 2,
+                                })}
+                              </td>
+                              <td className="px-4 py-2">
+                                {Number(bm.profit).toLocaleString("pt-BR", {
+                                  maximumFractionDigits: 2,
+                                })}
+                              </td>
+                            </tr>
+                          )
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                  <DialogFooter className="mt-8 flex gap-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setViewModalOpen(false)}
+                    >
+                      Fechar
+                    </Button>
+                  </DialogFooter>
+                  <DialogClose asChild>
+                    <button className="absolute top-4 right-4 p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                      <X className="w-5 h-5" />
+                      <span className="sr-only">Fechar</span>
+                    </button>
+                  </DialogClose>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+        </section>
+      </ToastProvider>
+    </TooltipProvider>
   );
 };

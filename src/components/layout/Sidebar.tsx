@@ -1,159 +1,133 @@
 import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useUIStore } from "../../stores/ui";
 import {
   Home,
   Upload,
   BarChart3,
   History,
+  FileText,
   Settings,
   HelpCircle,
-  TrendingUp,
-  BookOpen,
+  Menu,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
+import { useUIStore } from "../../stores/ui";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "../ui/tooltip";
 
-interface SidebarItemProps {
-  icon: React.ReactNode;
-  label: string;
-  href: string;
-  isActive?: boolean;
-  onClick: () => void;
-}
-
-const SidebarItem: React.FC<SidebarItemProps> = ({
-  icon,
-  label,
-  href,
-  isActive,
-  onClick,
-}) => {
-  return (
-    <button
-      onClick={onClick}
-      className={`sidebar-item w-full text-left ${isActive ? "active" : ""}`}
-    >
-      {icon}
-      <span className="ml-3">{label}</span>
-    </button>
-  );
-};
+const menuItems = [
+  { icon: <Home className="w-6 h-6" />, label: "Dashboard", href: "/" },
+  { icon: <Upload className="w-6 h-6" />, label: "Upload", href: "/upload" },
+  {
+    icon: <BarChart3 className="w-6 h-6" />,
+    label: "Analytics",
+    href: "/analytics",
+  },
+  {
+    icon: <History className="w-6 h-6" />,
+    label: "Histórico",
+    href: "/history",
+  },
+  {
+    icon: <FileText className="w-6 h-6" />,
+    label: "Relatórios",
+    href: "/reports",
+  },
+  {
+    icon: <Settings className="w-6 h-6" />,
+    label: "Configurações",
+    href: "/settings",
+  },
+  { icon: <HelpCircle className="w-6 h-6" />, label: "Ajuda", href: "/help" },
+];
 
 export const Sidebar: React.FC = () => {
-  const { sidebarOpen } = useUIStore();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const { sidebarOpen, toggleSidebar } = useUIStore();
+  const [isMobile, setIsMobile] = React.useState(false);
 
-  const menuItems = [
-    {
-      icon: <Home className="w-5 h-5" />,
-      label: "Dashboard",
-      href: "/",
-    },
-    {
-      icon: <Upload className="w-5 h-5" />,
-      label: "Upload",
-      href: "/upload",
-    },
-    {
-      icon: <BarChart3 className="w-5 h-5" />,
-      label: "Analytics",
-      href: "/analytics",
-    },
-    {
-      icon: <History className="w-5 h-5" />,
-      label: "Histórico",
-      href: "/history",
-    },
-    {
-      icon: <TrendingUp className="w-5 h-5" />,
-      label: "Performance",
-      href: "/performance",
-    },
-    {
-      icon: <BookOpen className="w-5 h-5" />,
-      label: "Relatórios",
-      href: "/reports",
-    },
-  ];
-
-  const bottomMenuItems = [
-    {
-      icon: <Settings className="w-5 h-5" />,
-      label: "Configurações",
-      href: "/settings",
-    },
-    {
-      icon: <HelpCircle className="w-5 h-5" />,
-      label: "Ajuda",
-      href: "/help",
-    },
-  ];
-
-  const handleNavigation = (href: string) => {
-    navigate(href);
-  };
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
-    <aside
-      className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"
-      }`}
-    >
-      <div className="flex flex-col h-full">
-        {/* Logo */}
-        <div className="flex items-center px-6 py-6 border-b border-gray-200">
-          <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">A</span>
-          </div>
-          <div className="ml-3">
-            <h2 className="text-lg font-bold text-gray-900">ArbWeb</h2>
-            <p className="text-xs text-gray-500">Premium</p>
-          </div>
+    <TooltipProvider>
+      {/* Overlay para mobile */}
+      {isMobile && sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+          onClick={toggleSidebar}
+          aria-label="Fechar menu"
+        />
+      )}
+      <aside
+        className={`fixed md:static z-50 h-full bg-zinc-900/95 border-r border-zinc-800 backdrop-blur-lg flex flex-col shadow-xl transition-all duration-300 ${
+          sidebarOpen ? "w-64" : "w-20"
+        }`}
+        aria-label="Sidebar de navegação"
+      >
+        <div className="flex items-center justify-between px-4 py-6">
+          <span className="text-primary text-2xl font-bold tracking-tight">
+            A
+          </span>
+          <button
+            className="p-2 rounded-lg hover:bg-zinc-800 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-600"
+            onClick={toggleSidebar}
+            aria-label={sidebarOpen ? "Recolher sidebar" : "Expandir sidebar"}
+          >
+            {sidebarOpen ? (
+              <ChevronLeft className="w-6 h-6 text-zinc-400" />
+            ) : (
+              <Menu className="w-6 h-6 text-zinc-400" />
+            )}
+          </button>
         </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-2">
+        <nav className="flex-1 flex flex-col gap-2 mt-4 items-center md:items-stretch">
           {menuItems.map((item) => (
-            <SidebarItem
-              key={item.href}
-              icon={item.icon}
-              label={item.label}
-              href={item.href}
-              isActive={location.pathname === item.href}
-              onClick={() => handleNavigation(item.href)}
-            />
+            <Tooltip key={item.href}>
+              <TooltipTrigger asChild>
+                <a
+                  href={item.href}
+                  className={`group flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-200 hover:bg-zinc-800/80 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                    sidebarOpen ? "justify-start w-full" : "justify-center w-12"
+                  }`}
+                  tabIndex={0}
+                  aria-label={item.label}
+                >
+                  {item.icon}
+                  {sidebarOpen && (
+                    <span className="ml-3 text-base font-medium text-zinc-100 group-hover:text-primary transition-colors">
+                      {item.label}
+                    </span>
+                  )}
+                </a>
+              </TooltipTrigger>
+              {!sidebarOpen && (
+                <TooltipContent side="right">{item.label}</TooltipContent>
+              )}
+            </Tooltip>
           ))}
         </nav>
-
-        {/* Bottom menu */}
-        <div className="px-4 py-6 border-t border-gray-200 space-y-2">
-          {bottomMenuItems.map((item) => (
-            <SidebarItem
-              key={item.href}
-              icon={item.icon}
-              label={item.label}
-              href={item.href}
-              isActive={location.pathname === item.href}
-              onClick={() => handleNavigation(item.href)}
-            />
-          ))}
+        <div className="flex items-center justify-center py-4">
+          <button
+            className="p-2 rounded-full hover:bg-zinc-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+            onClick={toggleSidebar}
+            aria-label={sidebarOpen ? "Recolher sidebar" : "Expandir sidebar"}
+          >
+            {sidebarOpen ? (
+              <ChevronLeft className="w-5 h-5 text-zinc-400" />
+            ) : (
+              <ChevronRight className="w-5 h-5 text-zinc-400" />
+            )}
+          </button>
         </div>
-
-        {/* User info */}
-        <div className="px-4 py-4 border-t border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-medium">U</span>
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">
-                Usuário Premium
-              </p>
-              <p className="text-xs text-gray-500">Plano Ativo</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </aside>
+      </aside>
+    </TooltipProvider>
   );
 };

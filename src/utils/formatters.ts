@@ -71,22 +71,22 @@ export const formatRelativeTime = (date: Date): string => {
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
   if (diffInSeconds < 60) {
-    return "agora mesmo";
+    return `há ${diffInSeconds} segundo${diffInSeconds === 1 ? "" : "s"}`;
   }
 
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) {
-    return `${diffInMinutes} min atrás`;
+    return `há ${diffInMinutes} minuto${diffInMinutes === 1 ? "" : "s"}`;
   }
 
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) {
-    return `${diffInHours}h atrás`;
+    return `há ${diffInHours} hora${diffInHours === 1 ? "" : "s"}`;
   }
 
   const diffInDays = Math.floor(diffInHours / 24);
   if (diffInDays < 7) {
-    return `${diffInDays} dias atrás`;
+    return `há ${diffInDays} dia${diffInDays === 1 ? "" : "s"}`;
   }
 
   return formatDateShort(date);

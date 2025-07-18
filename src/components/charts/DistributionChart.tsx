@@ -1,5 +1,4 @@
 import React from "react";
-import { Card } from "../ui/Card";
 import {
   BarChart,
   Bar,
@@ -44,34 +43,27 @@ export const DistributionChart: React.FC<DistributionChartProps> = ({
   };
 
   return (
-    <Card>
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-        <p className="text-sm text-gray-500">{subtitle}</p>
-      </div>
-
-      <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis
-              dataKey="name"
-              stroke="#6b7280"
-              fontSize={12}
-              angle={-45}
-              textAnchor="end"
-              height={80}
-            />
-            <YAxis
-              stroke="#6b7280"
-              fontSize={12}
-              tickFormatter={(value) => formatCurrency(value)}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="totalProfit" fill="#059669" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </Card>
+    <div className="h-64">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <XAxis
+            dataKey="name"
+            stroke="#6b7280"
+            fontSize={12}
+            angle={-45}
+            textAnchor="end"
+            height={80}
+          />
+          <YAxis
+            stroke="#6b7280"
+            fontSize={12}
+            tickFormatter={(value) => formatCurrency(value)}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Bar dataKey="totalProfit" fill="#059669" radius={[4, 4, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   );
 };

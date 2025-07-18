@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
-import { MetricsCard } from "../components/dashboard/MetricsCard";
+import { MetricCard } from "../components/dashboard/MetricsCard";
 import { ProfitChart } from "../components/charts/ProfitChart";
 import { DistributionChart } from "../components/charts/DistributionChart";
 import {
@@ -161,15 +161,8 @@ export const Performance: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center space-x-3">
-          <Button
-            variant="outline"
-            leftIcon={<RefreshCw className="w-4 h-4" />}
-          >
-            Atualizar
-          </Button>
-          <Button variant="outline" leftIcon={<Download className="w-4 h-4" />}>
-            Exportar
-          </Button>
+          <Button variant="outline">Atualizar</Button>
+          <Button variant="outline">Exportar</Button>
         </div>
       </div>
 
@@ -241,7 +234,7 @@ export const Performance: React.FC = () => {
 
       {/* Métricas Principais */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricsCard
+        <MetricCard
           title="Lucro Total"
           value={formatCurrency(2850)}
           change={12.5}
@@ -249,21 +242,21 @@ export const Performance: React.FC = () => {
           icon={<TrendingUp className="w-6 h-6 text-primary-600" />}
           variant="success"
         />
-        <MetricsCard
+        <MetricCard
           title="ROI Médio"
           value={formatPercentage(5.2)}
           change={8.2}
           changeType="positive"
           icon={<Target className="w-6 h-6 text-primary-600" />}
         />
-        <MetricsCard
+        <MetricCard
           title="Taxa de Sucesso"
           value={formatPercentage(89.5)}
           change={-2.1}
           changeType="negative"
           icon={<Award className="w-6 h-6 text-primary-600" />}
         />
-        <MetricsCard
+        <MetricCard
           title="Volume Total"
           value={formatCurrency(15800)}
           change={15.3}

@@ -1,5 +1,4 @@
 import React from "react";
-import { Card } from "../ui/Card";
 import {
   LineChart,
   Line,
@@ -38,53 +37,42 @@ export const ProfitChart: React.FC<ProfitChartProps> = ({ data }) => {
   };
 
   return (
-    <Card>
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">
-          Lucro ao Longo do Tempo
-        </h3>
-        <p className="text-sm text-gray-500">
-          Evolução do lucro nos últimos 30 dias
-        </p>
-      </div>
-
-      <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis
-              dataKey="date"
-              stroke="#6b7280"
-              fontSize={12}
-              tickFormatter={(value) =>
-                new Date(value).toLocaleDateString("pt-BR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                })
-              }
-            />
-            <YAxis
-              stroke="#6b7280"
-              fontSize={12}
-              tickFormatter={(value) => formatCurrency(value)}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Line
-              type="monotone"
-              dataKey="profit"
-              stroke="#059669"
-              strokeWidth={3}
-              dot={{ fill: "#059669", strokeWidth: 2, r: 4 }}
-              activeDot={{
-                r: 6,
-                stroke: "#059669",
-                strokeWidth: 2,
-                fill: "#ffffff",
-              }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    </Card>
+    <div className="h-64">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <XAxis
+            dataKey="date"
+            stroke="#6b7280"
+            fontSize={12}
+            tickFormatter={(value) =>
+              new Date(value).toLocaleDateString("pt-BR", {
+                day: "2-digit",
+                month: "2-digit",
+              })
+            }
+          />
+          <YAxis
+            stroke="#6b7280"
+            fontSize={12}
+            tickFormatter={(value) => formatCurrency(value)}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Line
+            type="monotone"
+            dataKey="profit"
+            stroke="#059669"
+            strokeWidth={3}
+            dot={{ fill: "#059669", strokeWidth: 2, r: 4 }}
+            activeDot={{
+              r: 6,
+              stroke: "#059669",
+              strokeWidth: 2,
+              fill: "#ffffff",
+            }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   );
 };

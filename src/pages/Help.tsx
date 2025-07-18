@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
-import { Input } from "../components/ui/Input";
 import {
   HelpCircle,
   Search,
@@ -15,7 +14,17 @@ import {
   ChevronRight,
   ExternalLink,
   Send,
+  X,
+  CheckCircle,
 } from "lucide-react";
+import {
+  Toast,
+  ToastProvider,
+  ToastViewport,
+  ToastClose,
+} from "../components/ui/toast";
+import { TooltipProvider } from "../components/ui/tooltip";
+import { Input } from "@/components/ui/Input";
 
 export const Help: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,6 +35,8 @@ export const Help: React.FC = () => {
     subject: "",
     message: "",
   });
+  const [showToast, setShowToast] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
 
   const faqCategories = [
     {
@@ -162,7 +173,9 @@ export const Help: React.FC = () => {
 
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Contact form submitted:", contactForm);
+    setToastMsg("Mensagem enviada com sucesso!");
+    setShowToast(true);
+    setContactForm({ name: "", email: "", subject: "", message: "" });
   };
 
   const handleContactChange = (field: string, value: string) => {
@@ -170,223 +183,266 @@ export const Help: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Central de Ajuda</h1>
-          <p className="text-gray-600">Encontre respostas e suporte</p>
-        </div>
-        <Button leftIcon={<MessageCircle className="w-4 h-4" />}>
-          Contatar Suporte
-        </Button>
-      </div>
-
-      {/* Busca */}
-      <Card>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <Input
-            placeholder="Busque por dúvidas, problemas ou funcionalidades..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </Card>
-
-      {/* Canais de Suporte */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {supportChannels.map((channel, index) => (
-          <Card key={index} className="text-center">
-            <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-              {channel.icon}
-            </div>
-            <h3 className="font-semibold text-gray-900 mb-2">
-              {channel.title}
-            </h3>
-            <p className="text-sm text-gray-600 mb-3">{channel.description}</p>
-            <p className="text-sm font-medium text-primary-600 mb-4">
-              {channel.contact}
-            </p>
-            <Button variant="outline" size="sm" className="w-full">
-              {channel.action}
-            </Button>
-          </Card>
-        ))}
-      </div>
-
-      {/* FAQ */}
-      <div className="space-y-6">
-        {faqCategories.map((category) => (
-          <Card key={category.id}>
-            <div className="flex items-center space-x-3 mb-6">
-              <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                {category.icon}
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                {category.title}
-              </h3>
-            </div>
-            <div className="space-y-4">
-              {category.faqs.map((faq, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg">
-                  <button
-                    onClick={() => handleFaqToggle(`${category.id}-${index}`)}
-                    className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
-                  >
-                    <span className="font-medium text-gray-900">
-                      {faq.question}
-                    </span>
-                    {expandedFaq === `${category.id}-${index}` ? (
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
-                    ) : (
-                      <ChevronRight className="w-5 h-5 text-gray-400" />
-                    )}
-                  </button>
-                  {expandedFaq === `${category.id}-${index}` && (
-                    <div className="px-4 pb-4">
-                      <p className="text-gray-600">{faq.answer}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      {/* Recursos */}
-      <Card>
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">
-          Recursos Úteis
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {resources.map((resource, index) => (
-            <div
-              key={index}
-              className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 transition-colors cursor-pointer"
+    <TooltipProvider>
+      <ToastProvider>
+        <section className="min-h-screen w-full bg-zinc-50 dark:bg-zinc-950 py-2">
+          <div className="max-w-screen-xl mx-auto px-4 space-y-10">
+            <h1 className="text-3xl font-bold mb-4 text-zinc-900 dark:text-zinc-100">
+              Central de Ajuda
+            </h1>
+            <Toast
+              open={showToast}
+              onOpenChange={setShowToast}
+              className="bg-green-600 text-white rounded-xl shadow-lg flex items-center gap-3 px-6 py-4 animate-in fade-in-0 slide-in-from-top-6"
             >
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                  {resource.icon}
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900">
-                    {resource.title}
-                  </h4>
-                  <span className="text-xs text-primary-600 font-medium">
-                    {resource.type}
-                  </span>
-                </div>
+              <CheckCircle className="w-5 h-5 text-white" />
+              <span className="font-medium">{toastMsg}</span>
+              <ToastClose asChild>
+                <button className="ml-auto p-1 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-white">
+                  <X className="w-4 h-4" />
+                </button>
+              </ToastClose>
+            </Toast>
+            <ToastViewport className="fixed top-6 right-6 z-[100]" />
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                  Central de Ajuda
+                </h1>
+                <p className="text-zinc-500 dark:text-zinc-400">
+                  Encontre respostas e suporte
+                </p>
               </div>
-              <p className="text-sm text-gray-600 mb-3">
-                {resource.description}
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                rightIcon={<ExternalLink className="w-4 h-4" />}
-              >
-                Acessar
+              <Button>
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Contatar Suporte
               </Button>
             </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* Formulário de Contato */}
-      <Card>
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">
-          Enviar Mensagem
-        </h3>
-        <form onSubmit={handleContactSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nome
-              </label>
-              <Input
-                value={contactForm.name}
-                onChange={(e) => handleContactChange("name", e.target.value)}
-                placeholder="Seu nome completo"
-                required
-              />
+            {/* Busca */}
+            <Card className="p-6 bg-white dark:bg-zinc-900">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-zinc-400" />
+                <Input
+                  placeholder="Busque por dúvidas, problemas ou funcionalidades..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </Card>
+            {/* Canais de Suporte */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {supportChannels.map((channel, index) => (
+                <Card
+                  key={index}
+                  className="text-center bg-white dark:bg-zinc-900"
+                >
+                  <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    {channel.icon}
+                  </div>
+                  <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+                    {channel.title}
+                  </h3>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3">
+                    {channel.description}
+                  </p>
+                  <p className="text-sm font-medium text-primary-600 dark:text-primary-300 mb-4">
+                    {channel.contact}
+                  </p>
+                  <Button variant="outline" size="sm" className="w-full">
+                    {channel.action}
+                  </Button>
+                </Card>
+              ))}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <Input
-                type="email"
-                value={contactForm.email}
-                onChange={(e) => handleContactChange("email", e.target.value)}
-                placeholder="seu@email.com"
-                required
-              />
+            {/* FAQ */}
+            <div className="space-y-6">
+              {faqCategories.map((category) => (
+                <Card key={category.id} className="bg-white dark:bg-zinc-900">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center">
+                      {category.icon}
+                    </div>
+                    <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                      {category.title}
+                    </h3>
+                  </div>
+                  <div className="space-y-4">
+                    {category.faqs.map((faq, index) => (
+                      <div
+                        key={index}
+                        className="border border-zinc-200 dark:border-zinc-800 rounded-lg"
+                      >
+                        <button
+                          onClick={() =>
+                            handleFaqToggle(`${category.id}-${index}`)
+                          }
+                          className="w-full flex items-center justify-between p-4 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                        >
+                          <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                            {faq.question}
+                          </span>
+                          {expandedFaq === `${category.id}-${index}` ? (
+                            <ChevronDown className="w-5 h-5 text-zinc-400" />
+                          ) : (
+                            <ChevronRight className="w-5 h-5 text-zinc-400" />
+                          )}
+                        </button>
+                        {expandedFaq === `${category.id}-${index}` && (
+                          <div className="px-4 pb-4">
+                            <p className="text-zinc-500 dark:text-zinc-300">
+                              {faq.answer}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              ))}
+            </div>
+            {/* Recursos */}
+            <Card className="bg-white dark:bg-zinc-900">
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-6">
+                Recursos Úteis
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {resources.map((resource, index) => (
+                  <div
+                    key={index}
+                    className="p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:border-primary-300 dark:hover:border-primary-400 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center">
+                        {resource.icon}
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-zinc-900 dark:text-zinc-100">
+                          {resource.title}
+                        </h4>
+                        <span className="text-xs text-primary-600 dark:text-primary-300 font-medium">
+                          {resource.type}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3">
+                      {resource.description}
+                    </p>
+                    <Button variant="outline" size="sm" className="w-full">
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Acessar
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </Card>
+            {/* Formulário de Contato */}
+            <Card className="bg-white dark:bg-zinc-900">
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-6">
+                Enviar Mensagem
+              </h3>
+              <form onSubmit={handleContactSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-200 mb-2">
+                      Nome
+                    </label>
+                    <Input
+                      value={contactForm.name}
+                      onChange={(e) =>
+                        handleContactChange("name", e.target.value)
+                      }
+                      placeholder="Seu nome completo"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-200 mb-2">
+                      Email
+                    </label>
+                    <Input
+                      type="email"
+                      value={contactForm.email}
+                      onChange={(e) =>
+                        handleContactChange("email", e.target.value)
+                      }
+                      placeholder="seu@email.com"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-200 mb-2">
+                    Assunto
+                  </label>
+                  <Input
+                    value={contactForm.subject}
+                    onChange={(e) =>
+                      handleContactChange("subject", e.target.value)
+                    }
+                    placeholder="Qual é o assunto da sua mensagem?"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-200 mb-2">
+                    Mensagem
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={contactForm.message}
+                    onChange={(e) =>
+                      handleContactChange("message", e.target.value)
+                    }
+                    placeholder="Descreva sua dúvida ou problema..."
+                    className="input-field dark:bg-zinc-800 dark:text-zinc-100"
+                    required
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <Button type="submit">
+                    <Send className="w-4 h-4 mr-2" />
+                    Enviar Mensagem
+                  </Button>
+                </div>
+              </form>
+            </Card>
+            {/* Informações Adicionais */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="bg-white dark:bg-zinc-900">
+                <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+                  Horário de Atendimento
+                </h4>
+                <div className="space-y-2 text-sm text-zinc-500 dark:text-zinc-400">
+                  <p>Segunda a Sexta: 8h às 18h</p>
+                  <p>Sábado: 9h às 14h</p>
+                  <p>Domingo: Fechado</p>
+                  <p className="text-primary-600 dark:text-primary-300 font-medium">
+                    Emergências: 24/7
+                  </p>
+                </div>
+              </Card>
+              <Card className="bg-white dark:bg-zinc-900">
+                <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+                  Informações Úteis
+                </h4>
+                <div className="space-y-2 text-sm text-zinc-500 dark:text-zinc-400">
+                  <p>Tempo médio de resposta: 2 horas</p>
+                  <p>
+                    Status do sistema:{" "}
+                    <span className="text-green-600 dark:text-green-400 font-medium">
+                      Online
+                    </span>
+                  </p>
+                  <p>Versão atual: v1.2.0</p>
+                  <p>Última atualização: 15/01/2024</p>
+                </div>
+              </Card>
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Assunto
-            </label>
-            <Input
-              value={contactForm.subject}
-              onChange={(e) => handleContactChange("subject", e.target.value)}
-              placeholder="Qual é o assunto da sua mensagem?"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Mensagem
-            </label>
-            <textarea
-              rows={4}
-              value={contactForm.message}
-              onChange={(e) => handleContactChange("message", e.target.value)}
-              placeholder="Descreva sua dúvida ou problema..."
-              className="input-field"
-              required
-            />
-          </div>
-          <div className="flex justify-end">
-            <Button type="submit" leftIcon={<Send className="w-4 h-4" />}>
-              Enviar Mensagem
-            </Button>
-          </div>
-        </form>
-      </Card>
-
-      {/* Informações Adicionais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <h4 className="font-semibold text-gray-900 mb-4">
-            Horário de Atendimento
-          </h4>
-          <div className="space-y-2 text-sm text-gray-600">
-            <p>Segunda a Sexta: 8h às 18h</p>
-            <p>Sábado: 9h às 14h</p>
-            <p>Domingo: Fechado</p>
-            <p className="text-primary-600 font-medium">Emergências: 24/7</p>
-          </div>
-        </Card>
-        <Card>
-          <h4 className="font-semibold text-gray-900 mb-4">
-            Informações Úteis
-          </h4>
-          <div className="space-y-2 text-sm text-gray-600">
-            <p>Tempo médio de resposta: 2 horas</p>
-            <p>
-              Status do sistema:{" "}
-              <span className="text-green-600 font-medium">Online</span>
-            </p>
-            <p>Versão atual: v1.2.0</p>
-            <p>Última atualização: 15/01/2024</p>
-          </div>
-        </Card>
-      </div>
-    </div>
+        </section>
+      </ToastProvider>
+    </TooltipProvider>
   );
 };

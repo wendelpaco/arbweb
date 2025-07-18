@@ -27,6 +27,7 @@ function parseArbitrageFromText(text: string) {
   let bookmakers = [];
   let foundTeams = false;
   let stakeTotal = 0;
+  let stakesArray: number[] = [];
 
   // Detectar times e competição
   for (let line of lines) {
@@ -49,7 +50,7 @@ function parseArbitrageFromText(text: string) {
     }
     // Detectar stake total
     if (line.toLowerCase().includes("aposta total")) {
-      const stakeMatch = line.match(/([0-9]{3,}[.,]?[0-9]*)/);
+      const stakeMatch = line.match(/([0-9.,]+)/);
       if (stakeMatch) {
         stakeTotal = parseFloat(stakeMatch[1].replace(/,/g, "."));
       }
@@ -58,31 +59,80 @@ function parseArbitrageFromText(text: string) {
 
   // Detectar casas, odds, stakes, lucros
   for (let i = 0; i < lines.length; i++) {
-    // Regex para odds, stake e lucro (números com ponto ou vírgula, ou colados)
+    // Regex para odds, stake e lucro (números com ponto ou vírgula)
     const regex =
-      /([A-Za-z0-9 ()\-+\.]+)\s+([0-9]{1,2}(?:[.,][0-9]+)?)\s+([A-Za-z0-9 ()\-+\.]+)?\s*([0-9]{4,}(?:[.,][0-9]+)?)\s*[A-Za-z]*\s*([0-9]{3,}(?:[.,][0-9]+)?)/;
+      /([A-Za-z0-9 ()\-+\.]+)\s+([0-9]{1,6}(?:[.,][0-9]{1,3})?)\s+([A-Za-z0-9 ()\-+\.]*)\s*([0-9]{1,8}(?:[.,][0-9]{1,2})?)\s*[A-Za-z]*\s*([0-9]{1,8}(?:[.,][0-9]{1,2})?)/;
     const m = lines[i].match(regex);
     if (m) {
-      // Corrigir números colados (ex: 1731185 → 17311.85 se stake for muito grande)
-      let stake = m[4];
-      if (stake.length > 6 && stake.indexOf(".") === -1) {
-        stake = stake.slice(0, -2) + "." + stake.slice(-2);
+      // Odds
+      let oddsRaw = m[2].replace(",", ".");
+      let odds = parseFloat(oddsRaw);
+      // Odds: tratar '325.' ou '325' como '3.25'
+      if (
+        (/^\d{3}\.?$/.test(oddsRaw) || /^\d{1,2}[.,]\d{1,3}$/.test(oddsRaw)) &&
+        (isNaN(odds) || odds < 1.01 || odds > 100)
+      ) {
+        // Ex: '325.' ou '325' → '3.25'
+        odds = parseFloat(
+          oddsRaw.replace(/\.$/, "").slice(0, -2) +
+            "." +
+            oddsRaw.replace(/\.$/, "").slice(-2)
+        );
+        console.log(`Corrigindo odds colada: ${oddsRaw} → ${odds}`);
       }
-      let profit = m[5];
-      if (profit && profit.length > 6 && profit.indexOf(".") === -1) {
-        profit = profit.slice(0, -2) + "." + profit.slice(-2);
+      // Odds válidas: 1.01 a 100
+      if (isNaN(odds) || odds < 1.01 || odds > 100) {
+        odds = 0; // Marcar como erro de OCR
+      }
+      // Stake
+      let stakeRaw = m[4].replace(/,/g, ".");
+      let stake = parseFloat(stakeRaw);
+      // Corrigir stake colado (ex: 129000 → 1290.00), mas só se for >= 5 dígitos, > 9999 e sem ponto
+      if (
+        !isNaN(stake) &&
+        stake > 9999 &&
+        /^\d{5,}$/.test(stakeRaw) &&
+        !stakeRaw.includes(".")
+      ) {
+        stake = parseFloat(stakeRaw.slice(0, -2) + "." + stakeRaw.slice(-2));
+        console.log(`Corrigindo stake colado: ${stakeRaw} → ${stake}`);
+      }
+      // Aceitar apenas até 2 casas decimais
+      if (isNaN(stake) || !/^\d{1,6}(?:[.,]\d{1,2})?$/.test(stake.toString())) {
+        stake = 0;
+      }
+      stakesArray.push(stake);
+      // Lucro
+      let profitRaw = m[5] ? m[5].replace(/,/g, ".") : "";
+      let profit = profitRaw ? parseFloat(profitRaw) : 0;
+      // Corrigir lucro colado (opcional, mesmo padrão do stake)
+      if (
+        (isNaN(profit) || profit > 10000) &&
+        /^\d{5,}$/.test(profitRaw) &&
+        !profitRaw.includes(".")
+      ) {
+        profit = parseFloat(profitRaw.slice(0, -2) + "." + profitRaw.slice(-2));
+        console.log(`Corrigindo lucro colado: ${profitRaw} → ${profit}`);
       }
       bookmakers.push({
         name: m[1].trim(),
-        odds: parseFloat(m[2].replace(",", ".")),
+        odds,
         betType: m[3]?.trim() || "",
-        stake: parseFloat(stake.replace(/,/g, ".")),
-        profit: profit ? parseFloat(profit.replace(/,/g, ".")) : 0,
+        stake,
+        profit,
       });
     }
   }
 
-  return { match, bookmakers, stakeTotal };
+  // Validação: stakes absurdos
+  const totalStakes = stakesArray.reduce((a, b) => a + b, 0);
+  for (let bm of bookmakers) {
+    if (bm.stake > 10000 || bm.stake > 10 * (totalStakes - bm.stake)) {
+      bm.stake = 0; // Marcar como erro de OCR
+    }
+  }
+
+  return { match, bookmakers };
 }
 
 interface ImageUploadProps {
@@ -108,6 +158,14 @@ export const ImageUpload = forwardRef<any, ImageUploadProps>(
     const [preview, setPreview] = useState<string | null>(null);
     const [ocrText, setOcrText] = useState<string>("");
     const [autoEdit, setAutoEdit] = useState(false);
+
+    // Iniciar processamento automático ao selecionar arquivo
+    React.useEffect(() => {
+      if (selectedFile) {
+        handleProcess();
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedFile]);
 
     useImperativeHandle(ref, () => ({
       clear: () => {
@@ -267,10 +325,7 @@ export const ImageUpload = forwardRef<any, ImageUploadProps>(
     return (
       <div className="space-y-6">
         {/* Upload Area */}
-        <Card
-          variant="outlined"
-          className="border-dashed border-2 border-gray-300"
-        >
+        <Card className="border-dashed border-2 border-gray-300">
           <div
             {...getRootProps()}
             className={`relative p-8 text-center transition-all duration-200 ${
@@ -319,25 +374,40 @@ export const ImageUpload = forwardRef<any, ImageUploadProps>(
                     {formatFileSize(selectedFile.size)}
                   </p>
                 </div>
+                {isProcessing && (
+                  <div className="flex justify-center items-center mt-4">
+                    <svg
+                      className="animate-spin h-6 w-6 text-primary-500 mr-2"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      />
+                    </svg>
+                    <span className="text-primary-600 font-medium">
+                      Processando imagem...
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>
         </Card>
 
         {/* Process Button */}
-        {selectedFile && (
-          <div className="flex justify-center">
-            <Button
-              onClick={handleProcess}
-              loading={isProcessing}
-              disabled={!selectedFile}
-              size="lg"
-              leftIcon={<ImageIcon className="w-5 h-5" />}
-            >
-              {isProcessing ? "Processando..." : "Processar Imagem"}
-            </Button>
-          </div>
-        )}
+        {/* Removido: botão de processamento manual */}
+        {/* Ao selecionar um arquivo, o processamento já é iniciado automaticamente */}
       </div>
     );
   }

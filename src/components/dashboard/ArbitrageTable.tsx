@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
-import { Input } from "../ui/Input";
+import { Input } from "../ui/input";
 import { ArbitrageData } from "../../types";
 import {
   formatCurrency,
@@ -75,7 +75,7 @@ export const ArbitrageTable: React.FC<ArbitrageTableProps> = ({
   };
 
   return (
-    <Card>
+    <Card className="mb-8">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-gray-900">
           Oportunidades de Arbitragem
@@ -90,11 +90,8 @@ export const ArbitrageTable: React.FC<ArbitrageTableProps> = ({
               className="pl-10"
             />
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            leftIcon={<Filter className="w-4 h-4" />}
-          >
+          <Button variant="outline" size="sm">
+            <Filter className="w-4 h-4 mr-2" />
             Filtros
           </Button>
         </div>
@@ -145,10 +142,7 @@ export const ArbitrageTable: React.FC<ArbitrageTableProps> = ({
                 <td className="py-4 px-4">
                   <div>
                     <div className="text-sm font-medium text-gray-900">
-                      {formatDateShort(arbitrage.timestamp)}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {formatRelativeTime(arbitrage.timestamp)}
+                      Criado {formatRelativeTime(arbitrage.timestamp)}
                     </div>
                   </div>
                 </td>
@@ -237,24 +231,24 @@ export const ArbitrageTable: React.FC<ArbitrageTableProps> = ({
                       variant="ghost"
                       size="sm"
                       onClick={() => onView(arbitrage)}
-                      leftIcon={<Eye className="w-4 h-4" />}
                     >
+                      <Eye className="w-4 h-4 mr-2" />
                       Ver
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => onEdit(arbitrage)}
-                      leftIcon={<Edit className="w-4 h-4" />}
                     >
+                      <Edit className="w-4 h-4 mr-2" />
                       Editar
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => onDelete(arbitrage.id)}
-                      leftIcon={<Trash2 className="w-4 h-4" />}
                     >
+                      <Trash2 className="w-4 h-4 mr-2" />
                       Excluir
                     </Button>
                   </div>

@@ -1,32 +1,17 @@
 import React from "react";
 import { Header } from "./Header";
-import { Sidebar } from "./Sidebar";
-import { useUIStore } from "../../stores/ui";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { sidebarOpen } = useUIStore();
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Sidebar */}
-      <Sidebar />
-
-      {/* Main Content */}
-      <div
-        className={`transition-all duration-300 ${
-          sidebarOpen ? "ml-64" : "ml-0"
-        }`}
-      >
-        {/* Header */}
-        <Header />
-
-        {/* Page Content */}
-        <main className="min-h-screen">{children}</main>
-      </div>
+    <div className="min-h-screen w-full bg-zinc-50 dark:bg-zinc-950 font-sans">
+      <Header />
+      <main className="flex-1 pt-24 md:pt-28 px-4 sm:px-6 md:px-10 max-w-7xl mx-auto space-y-6 text-zinc-900 dark:text-zinc-100">
+        {children}
+      </main>
     </div>
   );
 };
