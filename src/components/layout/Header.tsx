@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Home,
   Upload,
@@ -7,6 +7,8 @@ import {
   FileText,
   Settings,
   HelpCircle,
+  Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +39,16 @@ const menuItems = [
 ];
 
 export const Header: React.FC = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <header
       className={cn(
@@ -49,6 +61,7 @@ export const Header: React.FC = () => {
           <span className="text-primary text-2xl font-bold tracking-tight">
             ArbWeb
           </span>
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-2 lg:gap-4">
             {menuItems.map((item) => (
               <a
@@ -62,10 +75,41 @@ export const Header: React.FC = () => {
             ))}
           </nav>
         </div>
-        <div className="flex items-center gap-2">
-          {/* Theme toggle, user menu, etc. */}
-        </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          onClick={toggleMobileMenu}
+          className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors"
+          aria-label="Toggle mobile menu"
+        >
+          {isMobileMenuOpen ? (
+            <X className="w-5 h-5 text-primary" />
+          ) : (
+            <Menu className="w-5 h-5 text-primary" />
+          )}
+        </button>
       </div>
+
+      {/* Mobile Navigation */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden">
+          <div className="bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 shadow-lg">
+            <nav className="px-6 py-4 space-y-2">
+              {menuItems.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeMobileMenu}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-zinc-700 dark:text-zinc-200 hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/20 transition font-medium"
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </a>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
