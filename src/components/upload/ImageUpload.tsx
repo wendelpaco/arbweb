@@ -57,67 +57,54 @@ function parseArbitrageFromText(text: string) {
 
   // Detectar casas, odds, stakes, lucros
   for (let i = 0; i < lines.length; i++) {
-    // Regex: nome, tipo (texto livre), odd (3 casas decimais), stake, lucro
-    // Exemplo: Stake (BR) Acima 2.5 1º o time 3.200 614.75 BRL 99.45
+    // Regex robusta: nome da casa (Stake (BR)), tipo, odd, stake, lucro
+    // Exemplo: Stake (BR) Acima 2.5 1º o time 3.200 [E 614.75 BRL v 99.45
     const regex =
-      /^([A-Za-z0-9 ()\-+\.,ªº°¹²³áàãâéèêíïóôõöúçüÁÀÃÂÉÈÊÍÏÓÔÕÖÚÇÜ\[\]\/:;_]+)\s+(.+?)\s+([0-9]{1,2}\.[0-9]{3})\s+([0-9]+(?:[.,][0-9]{1,2})?)\s*[A-Za-z]*\s*([0-9]+(?:[.,][0-9]{1,2})?)$/;
+      /^([A-Za-z0-9 ]+\(BR\))\s+(.+?)\s+([0-9]{1,2}\.[0-9]{3})[^\d]+([0-9]+(?:[.,][0-9]{1,2})?)[^\d]+([0-9]+(?:[.,][0-9]{1,2})?)/;
     const m = lines[i].match(regex);
     if (m) {
-      console.log("Linha OCR:", lines[i]);
-      console.log("Odd extraída:", m[3]);
-      console.log("Tipo de aposta extraído:", m[2]);
-      const name = m[1].trim();
-      const betType = m[2].trim();
+      console.log("[PARSER] Linha OCR:", lines[i]);
+      console.log("[PARSER] Nome extraído:", m[1]);
+      console.log("[PARSER] Tipo de aposta extraído:", m[2]);
+      console.log("[PARSER] Odd extraída:", m[3]);
       let oddsRaw = m[3].replace(",", ".");
       let odds = parseFloat(oddsRaw);
-      let stakeRaw = m[4].replace(/,/g, ".");
-      let stake = parseFloat(stakeRaw);
-      // Corrigir stake colado (ex: 129000 → 1290.00), mas só se for >= 5 dígitos, > 9999 e sem ponto/vírgula
-      if (
-        !isNaN(stake) &&
-        stake > 9999 &&
-        /^\d{5,}$/.test(stakeRaw) &&
-        !stakeRaw.includes(".") &&
-        !stakeRaw.includes(",")
-      ) {
-        const stakeCorrigido = parseFloat(
-          stakeRaw.slice(0, -2) + "." + stakeRaw.slice(-2)
+      if (!/^\d{1,2}\.\d{3}$/.test(m[3])) {
+        console.warn("[PARSER] Odd ignorada (não tem 3 casas decimais):", m[3]);
+        continue;
+      }
+      const name = m[1].trim();
+      const betType = m[2].trim();
+      // NOVA LÓGICA: pegar todos os números após a odd
+      const afterOdd = lines[i].split(m[3])[1] || "";
+      // Extrair todos os números decimais
+      const numMatches = Array.from(
+        afterOdd.matchAll(/([0-9]+(?:[.,][0-9]{1,2})?)/g)
+      ).map((x) => x[1]);
+      // Stake: maior número antes de 'BRL', ou maior número decimal
+      let stake = 0;
+      let profit = 0;
+      if (numMatches.length) {
+        // Tentar pegar stake antes de 'BRL'
+        const beforeBrl = afterOdd.split(/BRL|brl/)[0];
+        const stakeCandidates = Array.from(
+          beforeBrl.matchAll(/([0-9]+(?:[.,][0-9]{1,2})?)/g)
+        ).map((x) => parseFloat(x[1].replace(/,/g, ".")));
+        if (stakeCandidates.length) {
+          stake = Math.max(...stakeCandidates);
+        } else {
+          // Se não achar antes de BRL, pega o maior número decimal
+          stake = Math.max(
+            ...numMatches.map((x) => parseFloat(x.replace(/,/g, ".")))
+          );
+        }
+        // Lucro: último número decimal da linha
+        profit = parseFloat(
+          numMatches[numMatches.length - 1].replace(/,/g, ".")
         );
-        console.log(`Corrigindo stake colado: ${stakeRaw} → ${stakeCorrigido}`);
-        stake = stakeCorrigido;
-      } else {
-        console.log(`Stake normal detectada: ${stakeRaw} → ${stake}`);
       }
-      // Fallback: se stake > 10x aposta total, usar valor original
-      // (aposta total extraída do texto OCR, se disponível)
-      // Exemplo: "Aposta total: 360.58 BRL"
-      let totalStakeExtraido = 0;
-      const matchTotal = text.match(/Aposta total\s*[:=]?\s*([\d.,]+)/i);
-      if (matchTotal && matchTotal[1]) {
-        totalStakeExtraido = parseFloat(
-          matchTotal[1].replace(/\./g, "").replace(",", ".")
-        );
-      }
-      if (totalStakeExtraido > 0 && stake > 10 * totalStakeExtraido) {
-        console.warn(
-          `Stake ${stake} muito maior que aposta total extraída ${totalStakeExtraido}, usando valor original: ${stakeRaw}`
-        );
-        stake = parseFloat(stakeRaw);
-      }
-      if (isNaN(stake) || !/^\d{1,6}(?:[.,]\d{1,2})?$/.test(stake.toString())) {
-        stake = 0;
-      }
-      stakesArray.push(stake);
-      let profitRaw = m[5] ? m[5].replace(/,/g, ".") : "";
-      let profit = profitRaw ? parseFloat(profitRaw) : 0;
-      if (
-        (isNaN(profit) || profit > 10000) &&
-        /^\d{5,}$/.test(profitRaw) &&
-        !profitRaw.includes(".")
-      ) {
-        profit = parseFloat(profitRaw.slice(0, -2) + "." + profitRaw.slice(-2));
-        console.log(`Corrigindo lucro colado: ${profitRaw} → ${profit}`);
-      }
+      console.log(`[PARSER] Stake extraído: ${stake}`);
+      console.log(`[PARSER] Lucro extraído: ${profit}`);
       bookmakers.push({
         name,
         odds,
@@ -125,6 +112,20 @@ function parseArbitrageFromText(text: string) {
         stake,
         profit,
       });
+      console.log(
+        `[PARSER] Resultado final: name=${name}, odds=${odds}, betType=${betType}, stake=${stake}, profit=${profit}`
+      );
+    } else {
+      // Log linha não reconhecida para depuração
+      if (
+        lines[i].toLowerCase().includes("stake") ||
+        lines[i].toLowerCase().includes("superbet")
+      ) {
+        console.warn(
+          "[PARSER] Linha de aposta não reconhecida pelo parser:",
+          lines[i]
+        );
+      }
     }
   }
 

@@ -542,7 +542,15 @@ export const Upload: React.FC = () => {
                     </span>
                     <span className="font-medium text-zinc-900 dark:text-zinc-100">
                       {processedData.metrics ? (
-                        formatCurrency(processedData.metrics.totalStake)
+                        (() => {
+                          console.log(
+                            "[UI] Stake total numérico:",
+                            processedData.metrics.totalStake
+                          );
+                          return formatCurrency(
+                            processedData.metrics.totalStake
+                          );
+                        })()
                       ) : (
                         <span className="text-red-600">---</span>
                       )}
@@ -627,7 +635,13 @@ export const Upload: React.FC = () => {
                             {bookmaker.betType || `Tipo ${index + 1}`}
                           </td>
                           <td className="py-3 px-4 text-zinc-900 dark:text-zinc-100">
-                            {formatCurrency(bookmaker.stake)}
+                            {(() => {
+                              console.log(
+                                "[UI] Stake individual numérico:",
+                                bookmaker.stake
+                              );
+                              return formatCurrency(bookmaker.stake);
+                            })()}
                           </td>
                           <td className="py-3 px-4 text-green-600 dark:text-green-400 font-medium">
                             {formatCurrency(bookmaker.profit)}
