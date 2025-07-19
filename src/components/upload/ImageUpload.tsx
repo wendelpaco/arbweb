@@ -310,12 +310,12 @@ export const ImageUpload = forwardRef<any, ImageUploadProps>(
     };
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Upload Area */}
         <Card className="border-dashed border-2 border-gray-300">
           <div
             {...getRootProps()}
-            className={`relative p-8 text-center transition-all duration-200 ${
+            className={`relative p-4 sm:p-6 lg:p-8 text-center transition-all duration-200 ${
               isDragActive
                 ? "border-primary-500 bg-primary-50"
                 : "hover:border-primary-400 hover:bg-gray-50"
@@ -324,47 +324,47 @@ export const ImageUpload = forwardRef<any, ImageUploadProps>(
             <input {...getInputProps()} />
 
             {!selectedFile ? (
-              <div className="space-y-4">
-                <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-                  <Upload className="w-8 h-8 text-gray-400" />
+              <div className="space-y-3 sm:space-y-4">
+                <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
                 </div>
                 <div>
-                  <p className="text-lg font-medium text-gray-900">
+                  <p className="text-base sm:text-lg font-medium text-gray-900">
                     Arraste e solte sua imagem aqui
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
                     ou clique para selecionar um arquivo
                   </p>
                 </div>
                 <p className="text-xs text-gray-400">PNG, JPG, JPEG até 10MB</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="relative inline-block">
                   <img
                     src={preview!}
                     alt="Preview"
-                    className="w-32 h-32 object-cover rounded-lg"
+                    className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-lg"
                   />
                   <button
                     onClick={handleRemoveFile}
-                    className="absolute -top-2 -right-2 w-6 h-6 bg-accent-500 text-white rounded-full flex items-center justify-center hover:bg-accent-600 transition-colors"
+                    className="absolute -top-2 -right-2 w-5 h-5 sm:w-6 sm:h-6 bg-accent-500 text-white rounded-full flex items-center justify-center hover:bg-accent-600 transition-colors"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3 h-3 sm:w-4 sm:h-4" />
                   </button>
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">
+                  <p className="font-medium text-gray-900 text-sm sm:text-base">
                     {formatFileName(selectedFile.name)}
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-xs sm:text-sm text-gray-500">
                     {formatFileSize(selectedFile.size)}
                   </p>
                 </div>
                 {isProcessing && (
                   <div className="flex justify-center items-center mt-4">
                     <svg
-                      className="animate-spin h-6 w-6 text-primary-500 mr-2"
+                      className="animate-spin h-5 w-5 sm:h-6 sm:w-6 text-primary-500 mr-2"
                       viewBox="0 0 24 24"
                     >
                       <circle
@@ -382,7 +382,7 @@ export const ImageUpload = forwardRef<any, ImageUploadProps>(
                         d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
                       />
                     </svg>
-                    <span className="text-primary-600 font-medium">
+                    <span className="text-primary-600 font-medium text-sm sm:text-base">
                       Processando imagem...
                     </span>
                   </div>

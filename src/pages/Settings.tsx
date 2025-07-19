@@ -862,8 +862,8 @@ export const Settings: React.FC = () => {
     <TooltipProvider>
       <ToastProvider>
         <section className="min-h-screen w-full bg-zinc-50 dark:bg-zinc-950 py-2">
-          <div className="max-w-screen-xl mx-auto px-4 space-y-10">
-            <h1 className="text-3xl font-bold mb-4 text-zinc-900 dark:text-zinc-100">
+          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-10">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-4 text-zinc-900 dark:text-zinc-100">
               Configurações
             </h1>
             <Toast
@@ -880,7 +880,7 @@ export const Settings: React.FC = () => {
               </ToastClose>
             </Toast>
             <ToastViewport className="fixed top-6 right-6 z-[100]" />
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
               {/* Sidebar */}
               <div className="lg:col-span-1">
                 <Card className="dark:bg-zinc-900 dark:border-zinc-800">
@@ -889,14 +889,14 @@ export const Settings: React.FC = () => {
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`w-full flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                        className={`w-full flex items-center space-x-2 sm:space-x-3 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors ${
                           activeTab === tab.id
                             ? "bg-primary-100 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300"
                             : "text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800"
                         }`}
                       >
-                        {tab.icon}
-                        <span>{tab.label}</span>
+                        <span className="w-4 h-4">{tab.icon}</span>
+                        <span className="hidden sm:inline">{tab.label}</span>
                       </button>
                     ))}
                   </nav>
@@ -905,10 +905,10 @@ export const Settings: React.FC = () => {
               {/* Content */}
               <div className="lg:col-span-3">
                 {activeTab === "profile" && (
-                  <div className="flex flex-col items-center justify-center min-h-[80vh]">
-                    <div className="w-full max-w-lg bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-10 flex flex-col items-center">
-                      <h3 className="text-2xl font-bold mb-10 text-center flex items-center justify-center gap-2 text-zinc-900 dark:text-zinc-100">
-                        <User className="w-8 h-8 text-primary-600 animate-bounce" />{" "}
+                  <div className="flex flex-col items-center justify-center min-h-[60vh] sm:min-h-[80vh]">
+                    <div className="w-full max-w-lg bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 lg:p-10 flex flex-col items-center">
+                      <h3 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-10 text-center flex items-center justify-center gap-2 text-zinc-900 dark:text-zinc-100">
+                        <User className="w-6 h-6 sm:w-8 sm:h-8 text-primary-600 animate-bounce" />{" "}
                         Perfil do Usuário
                       </h3>
                       <ProfileForm />
@@ -918,9 +918,9 @@ export const Settings: React.FC = () => {
 
                 {activeTab === "notifications" && (
                   <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                    <div className="w-full max-w-xl bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800 p-8">
-                      <h3 className="text-2xl font-bold mb-8 text-center flex items-center justify-center gap-2 text-zinc-900 dark:text-zinc-100">
-                        <Bell className="w-7 h-7 text-primary-600 animate-pulse" />{" "}
+                    <div className="w-full max-w-xl bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 lg:p-8">
+                      <h3 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-center flex items-center justify-center gap-2 text-zinc-900 dark:text-zinc-100">
+                        <Bell className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600 animate-pulse" />{" "}
                         Notificações
                       </h3>
                       <form onSubmit={handleNotifSave}>
@@ -951,9 +951,9 @@ export const Settings: React.FC = () => {
 
                 {activeTab === "security" && (
                   <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                    <div className="w-full max-w-xl bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800 p-8">
-                      <h3 className="text-2xl font-bold mb-8 text-center flex items-center justify-center gap-2 text-zinc-900 dark:text-zinc-100">
-                        <Shield className="w-7 h-7 text-primary-600 animate-bounce" />{" "}
+                    <div className="w-full max-w-xl bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 lg:p-8">
+                      <h3 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-center flex items-center justify-center gap-2 text-zinc-900 dark:text-zinc-100">
+                        <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600 animate-bounce" />{" "}
                         Segurança
                       </h3>
                       <Security2FA />
@@ -976,21 +976,23 @@ export const Settings: React.FC = () => {
 
                 {activeTab === "data" && (
                   <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                    <div className="w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-10 flex flex-col items-center">
-                      <h3 className="text-2xl font-bold mb-10 text-center flex items-center justify-center gap-2 text-zinc-900 dark:text-zinc-100">
-                        <Database className="w-8 h-8 text-primary-600 animate-bounce" />{" "}
+                    <div className="w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 lg:p-10 flex flex-col items-center">
+                      <h3 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-10 text-center flex items-center justify-center gap-2 text-zinc-900 dark:text-zinc-100">
+                        <Database className="w-6 h-6 sm:w-8 sm:h-8 text-primary-600 animate-bounce" />{" "}
                         Gerenciamento de Dados
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full mb-10">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 w-full mb-6 sm:mb-10">
                         {/* Exportar */}
-                        <div className="flex flex-col items-center p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-800 shadow group hover:shadow-lg transition">
-                          <Upload className="w-10 h-10 text-blue-500 group-hover:scale-110 transition" />
-                          <span className="font-semibold mt-2">Exportar</span>
+                        <div className="flex flex-col items-center p-4 sm:p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-800 shadow group hover:shadow-lg transition">
+                          <Upload className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500 group-hover:scale-110 transition" />
+                          <span className="font-semibold mt-2 text-sm sm:text-base">
+                            Exportar
+                          </span>
                           <span className="text-xs text-zinc-400 mt-1 text-center">
                             Backup de todos os seus dados em JSON
                           </span>
                           <Button
-                            className="w-full py-3 text-base font-semibold rounded-xl shadow-md transition-all duration-150 hover:scale-105"
+                            className="w-full py-2 sm:py-3 text-sm sm:text-base font-semibold rounded-xl shadow-md transition-all duration-150 hover:scale-105"
                             variant="default"
                             onClick={handleExportData}
                           >
@@ -998,14 +1000,16 @@ export const Settings: React.FC = () => {
                           </Button>
                         </div>
                         {/* Importar */}
-                        <div className="flex flex-col items-center p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-800 shadow group hover:shadow-lg transition">
-                          <Download className="w-10 h-10 text-green-500 group-hover:scale-110 transition" />
-                          <span className="font-semibold mt-2">Importar</span>
+                        <div className="flex flex-col items-center p-4 sm:p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-800 shadow group hover:shadow-lg transition">
+                          <Download className="w-8 h-8 sm:w-10 sm:h-10 text-green-500 group-hover:scale-110 transition" />
+                          <span className="font-semibold mt-2 text-sm sm:text-base">
+                            Importar
+                          </span>
                           <span className="text-xs text-zinc-400 mt-1 text-center">
                             Restaure seus dados de um backup
                           </span>
                           <Button
-                            className="w-full py-3 text-base font-semibold rounded-xl shadow-md transition-all duration-150 hover:scale-105"
+                            className="w-full py-2 sm:py-3 text-sm sm:text-base font-semibold rounded-xl shadow-md transition-all duration-150 hover:scale-105"
                             variant="default"
                             onClick={handleImportData}
                           >
@@ -1013,14 +1017,16 @@ export const Settings: React.FC = () => {
                           </Button>
                         </div>
                         {/* Resetar */}
-                        <div className="flex flex-col items-center p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-800 shadow group hover:shadow-lg transition">
-                          <RefreshCw className="w-10 h-10 text-yellow-500 group-hover:scale-110 transition" />
-                          <span className="font-semibold mt-2">Resetar</span>
+                        <div className="flex flex-col items-center p-4 sm:p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-800 shadow group hover:shadow-lg transition">
+                          <RefreshCw className="w-8 h-8 sm:w-10 sm:h-10 text-yellow-500 group-hover:scale-110 transition" />
+                          <span className="font-semibold mt-2 text-sm sm:text-base">
+                            Resetar
+                          </span>
                           <span className="text-xs text-zinc-400 mt-1 text-center">
                             Volte aos dados de exemplo iniciais
                           </span>
                           <Button
-                            className="w-full py-3 text-base font-semibold rounded-xl shadow-md transition-all duration-150 hover:scale-105"
+                            className="w-full py-2 sm:py-3 text-sm sm:text-base font-semibold rounded-xl shadow-md transition-all duration-150 hover:scale-105"
                             variant="outline"
                             onClick={handleResetData}
                           >
@@ -1029,9 +1035,9 @@ export const Settings: React.FC = () => {
                         </div>
                       </div>
                       {/* Zona de Perigo */}
-                      <div className="mt-8 p-6 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 flex flex-col items-center w-full">
-                        <Trash2 className="w-8 h-8 text-red-500 mb-2 animate-pulse" />
-                        <span className="font-bold text-red-700 mb-1">
+                      <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 flex flex-col items-center w-full">
+                        <Trash2 className="w-6 h-6 sm:w-8 sm:h-8 text-red-500 mb-2 animate-pulse" />
+                        <span className="font-bold text-red-700 mb-1 text-sm sm:text-base">
                           Excluir Conta
                         </span>
                         <span className="text-xs text-red-600 mb-4 text-center">
@@ -1039,7 +1045,7 @@ export const Settings: React.FC = () => {
                           serão permanentemente excluídos.
                         </span>
                         <Button
-                          className="w-full py-3 text-base font-semibold rounded-xl shadow-md transition-all duration-150 hover:scale-105"
+                          className="w-full py-2 sm:py-3 text-sm sm:text-base font-semibold rounded-xl shadow-md transition-all duration-150 hover:scale-105"
                           variant="destructive"
                           onClick={handleDeleteAccount}
                         >

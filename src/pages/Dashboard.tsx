@@ -208,78 +208,82 @@ export const Dashboard: React.FC = () => {
               </Dialog>
             )}
             {/* Cards de métricas premium - visual profissional */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-10">
-              <Card className="rounded-2xl shadow-card p-8 flex flex-col gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-10">
+              <Card className="rounded-2xl shadow-card p-4 sm:p-6 lg:p-8 flex flex-col gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
                 <div className="flex items-center gap-2 mb-1">
-                  <DollarSign className="w-5 h-5 text-green-500" />
+                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
                   <span className="text-xs font-medium text-zinc-500">
                     Lucro Total
                   </span>
                 </div>
-                <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-zinc-900 dark:text-zinc-100">
                   {formatCurrency(dashboardMetrics.totalProfit)}
                 </div>
               </Card>
-              <Card className="rounded-2xl shadow-card p-8 flex flex-col gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+              <Card className="rounded-2xl shadow-card p-4 sm:p-6 lg:p-8 flex flex-col gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
                 <div className="flex items-center gap-2 mb-1">
-                  <TrendingUp className="w-5 h-5 text-blue-500" />
+                  <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
                   <span className="text-xs font-medium text-zinc-500">
                     ROI Médio
                   </span>
                 </div>
-                <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-zinc-900 dark:text-zinc-100">
                   {formatROI(dashboardMetrics.averageRoi)}
                 </div>
               </Card>
-              <Card className="rounded-2xl shadow-card p-8 flex flex-col gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+              <Card className="rounded-2xl shadow-card p-4 sm:p-6 lg:p-8 flex flex-col gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
                 <div className="flex items-center gap-2 mb-1">
-                  <PieChart className="w-5 h-5 text-purple-500" />
+                  <PieChart className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
                   <span className="text-xs font-medium text-zinc-500">
                     Arbitragens
                   </span>
                 </div>
-                <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-zinc-900 dark:text-zinc-100">
                   {dashboardMetrics.totalArbitrages}
                 </div>
               </Card>
-              <Card className="rounded-2xl shadow-card p-8 flex flex-col gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+              <Card className="rounded-2xl shadow-card p-4 sm:p-6 lg:p-8 flex flex-col gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
                 <div className="flex items-center gap-2 mb-1">
-                  <Award className="w-5 h-5 text-yellow-500" />
+                  <Award className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" />
                   <span className="text-xs font-medium text-zinc-500">
                     Taxa de Sucesso
                   </span>
                 </div>
-                <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-zinc-900 dark:text-zinc-100">
                   {formatPercentage(dashboardMetrics.successRate)}
                 </div>
               </Card>
             </div>
             {/* Gráficos premium */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-              <Card className="p-8 rounded-2xl shadow-md bg-white dark:bg-zinc-900">
-                <h3 className="text-lg font-semibold mb-4 text-zinc-900 dark:text-zinc-100">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-10">
+              <Card className="p-4 sm:p-6 lg:p-8 rounded-2xl shadow-md bg-white dark:bg-zinc-900">
+                <h3 className="text-base sm:text-lg font-semibold mb-4 text-zinc-900 dark:text-zinc-100">
                   Lucro ao longo do tempo
                 </h3>
-                <ProfitChart data={dashboardMetrics.profitByPeriod} />
+                <div className="h-64 sm:h-80">
+                  <ProfitChart data={dashboardMetrics.profitByPeriod} />
+                </div>
               </Card>
-              <Card className="p-8 rounded-2xl shadow-md bg-white dark:bg-zinc-900">
-                <h3 className="text-lg font-semibold mb-4 text-zinc-900 dark:text-zinc-100">
+              <Card className="p-4 sm:p-6 lg:p-8 rounded-2xl shadow-md bg-white dark:bg-zinc-900">
+                <h3 className="text-base sm:text-lg font-semibold mb-4 text-zinc-900 dark:text-zinc-100">
                   Distribuição por Casas
                 </h3>
-                <DistributionChart
-                  data={dashboardMetrics.bookmakerDistribution}
-                  title="Distribuição por Casas"
-                  subtitle="Lucro total por casa de apostas"
-                />
+                <div className="h-64 sm:h-80">
+                  <DistributionChart
+                    data={dashboardMetrics.bookmakerDistribution}
+                    title="Distribuição por Casas"
+                    subtitle="Lucro total por casa de apostas"
+                  />
+                </div>
               </Card>
             </div>
             {/* Tabela premium */}
-            <Card className="p-0 overflow-x-auto mt-4 rounded-2xl shadow-md bg-white dark:bg-zinc-900">
-              <div className="flex items-center justify-between px-8 pt-8 pb-4">
-                <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+            <Card className="p-0 overflow-hidden mt-4 rounded-2xl shadow-md bg-white dark:bg-zinc-900">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-4">
+                <h2 className="text-lg sm:text-xl font-semibold text-zinc-900 dark:text-zinc-100">
                   Oportunidades de Arbitragem
                 </h2>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                   <Label htmlFor="search-arbs" className="sr-only">
                     Buscar arbitragens
                   </Label>
@@ -287,18 +291,18 @@ export const Dashboard: React.FC = () => {
                     id="search-arbs"
                     type="text"
                     placeholder="Buscar arbitragens..."
-                    className="h-10 w-64 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 shadow focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all"
+                    className="h-10 w-full sm:w-64 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 shadow focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                   <Button
                     variant="default"
-                    size="lg"
-                    className="transition-all shadow-premium rounded-xl flex items-center gap-2"
+                    size="sm"
+                    className="transition-all shadow-premium rounded-xl flex items-center gap-2 w-full sm:w-auto"
                   >
                     <svg
-                      width="18"
-                      height="18"
+                      width="16"
+                      height="16"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -315,31 +319,28 @@ export const Dashboard: React.FC = () => {
                 </div>
               </div>
               <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
+                <table className="min-w-full text-xs sm:text-sm">
                   <thead className="bg-zinc-100 dark:bg-zinc-800 sticky top-0 z-10">
                     <tr>
-                      <th className="px-6 py-4 text-left font-semibold text-zinc-500">
+                      <th className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 text-left font-semibold text-zinc-500">
                         Data
                       </th>
-                      <th className="px-6 py-4 text-left font-semibold text-zinc-500">
+                      <th className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 text-left font-semibold text-zinc-500">
                         Partida
                       </th>
-                      <th className="px-6 py-4 text-left font-semibold text-zinc-500">
+                      <th className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 text-left font-semibold text-zinc-500">
                         Esporte
                       </th>
-                      <th className="px-6 py-4 text-left font-semibold text-zinc-500">
+                      <th className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 text-left font-semibold text-zinc-500">
                         Lucro
                       </th>
-                      <th className="px-6 py-4 text-left font-semibold text-zinc-500">
+                      <th className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 text-left font-semibold text-zinc-500">
                         ROI
                       </th>
-                      <th className="px-6 py-4 text-left font-semibold text-zinc-500">
+                      <th className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 text-left font-semibold text-zinc-500">
                         Casas
                       </th>
-                      {/* <th className="px-6 py-4 text-left font-semibold text-zinc-500">
-                        Status
-                      </th> */}
-                      <th className="px-6 py-4 text-left font-semibold text-zinc-500">
+                      <th className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 text-left font-semibold text-zinc-500">
                         Ações
                       </th>
                     </tr>
@@ -350,24 +351,28 @@ export const Dashboard: React.FC = () => {
                         key={arb.id}
                         className="hover:bg-zinc-50 dark:hover:bg-zinc-900 transition"
                       >
-                        <td className="px-6 py-4 whitespace-nowrap text-zinc-700 dark:text-zinc-200">
+                        <td className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 whitespace-nowrap text-zinc-700 dark:text-zinc-200">
                           {arb.timestamp
                             ? formatRelativeTime(new Date(arb.timestamp))
                             : "-"}
                         </td>
-                        <td className="px-6 py-4 font-medium text-zinc-900 dark:text-zinc-100">
-                          {arb.match?.team1} vs {arb.match?.team2}
-                          <div className="text-xs text-zinc-500">
-                            {arb.match?.competition}
+                        <td className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 font-medium text-zinc-900 dark:text-zinc-100">
+                          <div className="max-w-[120px] sm:max-w-none">
+                            <div className="truncate">
+                              {arb.match?.team1} vs {arb.match?.team2}
+                            </div>
+                            <div className="text-xs text-zinc-500 truncate">
+                              {arb.match?.competition}
+                            </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
                           <span className="inline-block px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-xs">
                             {arb.match?.sport}
                           </span>
                         </td>
                         <td
-                          className={`px-6 py-4 font-semibold ${
+                          className={`px-3 sm:px-4 lg:px-6 py-3 sm:py-4 font-semibold ${
                             arb.metrics?.totalProfit < 0
                               ? "text-red-600 dark:text-red-400"
                               : "text-green-600 dark:text-green-400"
@@ -376,7 +381,7 @@ export const Dashboard: React.FC = () => {
                           {formatCurrency(arb.metrics?.totalProfit)}
                         </td>
                         <td
-                          className={`px-6 py-4 font-semibold ${
+                          className={`px-3 sm:px-4 lg:px-6 py-3 sm:py-4 font-semibold ${
                             arb.metrics?.roi < 0
                               ? "text-red-600 dark:text-red-400"
                               : "text-green-600 dark:text-green-400"
@@ -384,16 +389,11 @@ export const Dashboard: React.FC = () => {
                         >
                           {formatPercentage(arb.metrics?.roi)}
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
                           {arb.bookmakers?.length} casas
                         </td>
-                        {/* <td className="px-6 py-4">
-                          <span className="inline-block px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 text-xs font-semibold shadow-sm">
-                            {arb.status}
-                          </span>
-                        </td> */}
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
+                        <td className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
+                          <div className="flex items-center gap-1 sm:gap-2">
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
@@ -402,11 +402,12 @@ export const Dashboard: React.FC = () => {
                                   aria-label="Ver"
                                   title="Ver"
                                   onClick={() => handleViewArbitrage(arb)}
-                                  className="focus-visible:ring-2 focus-visible:ring-primary-500"
+                                  className="focus-visible:ring-2 focus-visible:ring-primary-500 p-1 sm:p-2"
                                 >
                                   <svg
-                                    width="18"
-                                    height="18"
+                                    width="14"
+                                    height="14"
+                                    className="sm:w-4 sm:h-4"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -438,11 +439,12 @@ export const Dashboard: React.FC = () => {
                                   aria-label="Editar"
                                   title="Editar"
                                   onClick={() => handleEditArbitrage(arb)}
-                                  className="focus-visible:ring-2 focus-visible:ring-primary-500"
+                                  className="focus-visible:ring-2 focus-visible:ring-primary-500 p-1 sm:p-2"
                                 >
                                   <svg
-                                    width="18"
-                                    height="18"
+                                    width="14"
+                                    height="14"
+                                    className="sm:w-4 sm:h-4"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -473,11 +475,12 @@ export const Dashboard: React.FC = () => {
                                       `${arb.match?.team1} vs ${arb.match?.team2}`
                                     )
                                   }
-                                  className="focus-visible:ring-2 focus-visible:ring-primary-500"
+                                  className="focus-visible:ring-2 focus-visible:ring-primary-500 p-1 sm:p-2"
                                 >
                                   <svg
-                                    width="18"
-                                    height="18"
+                                    width="14"
+                                    height="14"
+                                    className="sm:w-4 sm:h-4"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -523,18 +526,18 @@ export const Dashboard: React.FC = () => {
             {/* Modal de visualização premium */}
             {viewModalOpen && selectedArbitrage && (
               <Dialog open={viewModalOpen} onOpenChange={setViewModalOpen}>
-                <DialogContent className="max-w-2xl p-8 rounded-2xl shadow-2xl bg-white dark:bg-zinc-950 animate-in fade-in-0 scale-in-95">
+                <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 lg:p-8 rounded-2xl shadow-2xl bg-white dark:bg-zinc-950 animate-in fade-in-0 scale-in-95">
                   <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+                    <DialogTitle className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100">
                       Detalhes da Arbitragem
                     </DialogTitle>
-                    <DialogDescription className="text-zinc-500 dark:text-zinc-400">
+                    <DialogDescription className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400">
                       {selectedArbitrage.match?.team1} vs{" "}
                       {selectedArbitrage.match?.team2} —{" "}
                       {selectedArbitrage.match?.competition}
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
                     <div className="space-y-3">
                       <div>
                         <span className="block text-xs text-zinc-500 mb-1">

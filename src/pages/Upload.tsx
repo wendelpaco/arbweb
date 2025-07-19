@@ -246,17 +246,17 @@ export const Upload: React.FC = () => {
           onSave={handleEditSave}
         />
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
             Upload de Imagens
           </h1>
-          <p className="text-zinc-500 dark:text-zinc-400">
+          <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400">
             Faça upload de imagens de odds para análise automática de arbitragem
           </p>
         </div>
 
         {/* Upload Section */}
-        <Card className="max-w-2xl mx-auto p-8 rounded-2xl shadow-md bg-white dark:bg-zinc-900 mb-8">
+        <Card className="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8 rounded-2xl shadow-md bg-white dark:bg-zinc-900 mb-6 sm:mb-8">
           <ImageUpload
             ref={imageUploadRef}
             onFileSelect={handleFileSelect}
@@ -269,7 +269,7 @@ export const Upload: React.FC = () => {
 
         {/* Error Display */}
         {error && (
-          <Card className="max-w-2xl mx-auto border-accent-200 bg-accent-50 p-6 rounded-2xl flex items-center gap-3 mb-8">
+          <Card className="max-w-2xl mx-auto border-accent-200 bg-accent-50 p-4 sm:p-6 rounded-2xl flex items-center gap-3 mb-6 sm:mb-8">
             <X className="w-5 h-5 text-accent-600" />
             <div>
               <h3 className="font-medium text-accent-800">
@@ -282,7 +282,7 @@ export const Upload: React.FC = () => {
 
         {/* Results Display */}
         {processedData && (
-          <Card className="max-w-4xl mx-auto p-8 rounded-2xl shadow-md bg-white dark:bg-zinc-900 mb-8">
+          <Card className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 rounded-2xl shadow-md bg-white dark:bg-zinc-900 mb-6 sm:mb-8">
             {/* OCR Debug */}
             {debugOcr && processedData.ocrText && (
               <details
@@ -348,7 +348,7 @@ export const Upload: React.FC = () => {
               Dados extraídos com sucesso
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {/* Match Info */}
               <div>
                 <h4 className="font-medium text-zinc-900 dark:text-zinc-100 mb-4">
