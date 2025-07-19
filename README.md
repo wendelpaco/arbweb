@@ -2,7 +2,7 @@
 
 Um sistema web premium para análise de arbitragem esportiva que processa imagens de odds de casas de apostas e gera métricas detalhadas.
 
-## 🚀 Funcionalidades
+## 🚀 Funcionalidades -
 
 ### Core Features
 
