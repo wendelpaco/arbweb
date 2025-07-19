@@ -41,10 +41,44 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
     initialBookmakers ?? []
   );
 
+  // Adicionar um estado local para controlar o valor de odds como string
+  const [oddsInputs, setOddsInputs] = useState<string[]>(
+    (initialBookmakers ?? []).map((bm) => String(bm.odds ?? ""))
+  );
+
   React.useEffect(() => {
     setMatch(initialMatch);
     setBookmakers(initialBookmakers ?? []);
   }, [initialMatch, initialBookmakers, isOpen]);
+
+  // Sincronizar oddsInputs quando abrir o modal ou mudar os bookmakers
+  React.useEffect(() => {
+    setOddsInputs((initialBookmakers ?? []).map((bm) => String(bm.odds ?? "")));
+  }, [initialBookmakers, isOpen]);
+
+  // Atualizar oddsInputs ao editar odds
+  const handleOddsInputChange = (index: number, value: string) => {
+    // Permitir apenas números, vírgula e ponto, e até 3 casas decimais
+    let sanitized = value.replace(/[^0-9.,]/g, "");
+    sanitized = sanitized.replace(/,/g, ".");
+    // Limitar para apenas um separador decimal
+    const parts = sanitized.split(".");
+    if (parts.length > 2) {
+      sanitized = parts[0] + "." + parts.slice(1).join("");
+    }
+    // Limitar para 3 casas decimais
+    if (sanitized.includes(".")) {
+      const [intPart, decPart] = sanitized.split(".");
+      sanitized = intPart + "." + decPart.slice(0, 3);
+    }
+    setOddsInputs((prev) => prev.map((v, i) => (i === index ? sanitized : v)));
+    // Atualizar o estado dos bookmakers
+    handleBookmakerChange(
+      index,
+      "odds",
+      sanitized === "" ? 0 : Number(sanitized)
+    );
+  };
 
   const handleBookmakerChange = (
     index: number,
@@ -279,14 +313,8 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
                   <td className="px-2 py-2">
                     <Input
                       type="text"
-                      value={formatOdds(bm.odds)}
-                      onChange={(e) =>
-                        handleBookmakerChange(
-                          i,
-                          "odds",
-                          formatNumberInput(e.target.value)
-                        )
-                      }
+                      value={oddsInputs[i] ?? ""}
+                      onChange={(e) => handleOddsInputChange(i, e.target.value)}
                       placeholder="Odds"
                       inputMode="decimal"
                       className="rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 shadow focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all text-xs"

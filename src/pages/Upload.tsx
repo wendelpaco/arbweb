@@ -19,6 +19,10 @@ import {
 } from "../components/ui/Toast";
 import { EditArbitrageModal } from "../components/ui/EditArbitrageModal";
 import { useUIStore } from "../stores/ui";
+import {
+  calculateOptimalStakes,
+  validateAndCalculateArbitrage,
+} from "../utils/calculations";
 
 export const Upload: React.FC = () => {
   const { addArbitrage, setLoading, setError } = useArbitrageStore();
@@ -43,8 +47,9 @@ export const Upload: React.FC = () => {
         const text = await import("../utils/ocr").then((m) =>
           m.extractTextFromImage(file)
         );
-        // setOcrText(text); // Não é necessário aqui
-        let match, bookmakers;
+        let match,
+          bookmakers,
+          totalStakeExtraido = 0;
         const openaiKey = import.meta.env.VITE_OPENAI_API_KEY;
         if (openaiKey) {
           // Usar OpenAI para estruturar os dados
@@ -53,6 +58,18 @@ export const Upload: React.FC = () => {
           );
           match = result.match;
           bookmakers = result.bookmakers;
+          // Tentar extrair aposta total do JSON retornado
+          if (result.metrics && result.metrics.totalStake) {
+            totalStakeExtraido = result.metrics.totalStake;
+          } else {
+            // Regex para "Aposta total: 17200 BRL" no texto OCR
+            const matchTotal = text.match(/Aposta total\s*[:=]?\s*([\d.,]+)/i);
+            if (matchTotal && matchTotal[1]) {
+              totalStakeExtraido = parseFloat(
+                matchTotal[1].replace(/\./g, "").replace(",", ".")
+              );
+            }
+          }
         } else {
           // Fallback para parser local usando processImageOCR
           const localResult = await import("../utils/ocr").then((m) =>
@@ -67,7 +84,6 @@ export const Upload: React.FC = () => {
           !bookmakers ||
           bookmakers.length === 0
         ) {
-          // setAutoEdit(true); // Não é necessário aqui
           handleProcessingComplete({
             ocrText: text,
             match: match || {},
@@ -95,14 +111,23 @@ export const Upload: React.FC = () => {
             "Não foi possível extrair dados válidos da imagem. Edite manualmente."
           );
         }
-        // Calcular payouts e validar
-        const bmsWithProfit = bookmakers.map((bm: any) => ({
-          ...bm,
-          profit: bm.stake * bm.odds,
-        }));
-        const validation = await import("../utils/calculations").then((m) =>
-          m.validateAndCalculateArbitrage(bmsWithProfit)
-        );
+        // Se houver aposta total extraída e odds válidas, distribuir stakes de forma ótima
+        let bmsWithProfit = bookmakers;
+        if (
+          totalStakeExtraido > 0 &&
+          bookmakers.every((bm: any) => bm.odds > 1)
+        ) {
+          bmsWithProfit = calculateOptimalStakes(
+            bookmakers,
+            totalStakeExtraido
+          );
+        } else {
+          bmsWithProfit = bookmakers.map((bm: any) => ({
+            ...bm,
+            profit: bm.stake * bm.odds,
+          }));
+        }
+        const validation = validateAndCalculateArbitrage(bmsWithProfit);
         const processedData = {
           match,
           bookmakers: bmsWithProfit,
