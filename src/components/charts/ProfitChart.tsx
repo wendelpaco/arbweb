@@ -18,6 +18,10 @@ interface ProfitChartProps {
 }
 
 export const ProfitChart: React.FC<ProfitChartProps> = ({ data }) => {
+  // Ordenar por data crescente
+  const sortedData = [...data].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -39,7 +43,7 @@ export const ProfitChart: React.FC<ProfitChartProps> = ({ data }) => {
   return (
     <div className="h-64">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data}>
+        <LineChart data={sortedData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis
             dataKey="date"

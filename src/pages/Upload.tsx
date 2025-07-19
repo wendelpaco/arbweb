@@ -24,6 +24,15 @@ import {
   validateAndCalculateArbitrage,
 } from "../utils/calculations";
 
+// Função para converter valor BRL string para número
+function parseBRLNumber(str: string): number {
+  str = str.trim();
+  if (str.includes(",")) {
+    return parseFloat(str.replace(/\./g, "").replace(",", "."));
+  }
+  return parseFloat(str.replace(/\./g, ""));
+}
+
 export const Upload: React.FC = () => {
   const { addArbitrage, setLoading, setError } = useArbitrageStore();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -65,9 +74,7 @@ export const Upload: React.FC = () => {
             // Regex para "Aposta total: 17200 BRL" no texto OCR
             const matchTotal = text.match(/Aposta total\s*[:=]?\s*([\d.,]+)/i);
             if (matchTotal && matchTotal[1]) {
-              totalStakeExtraido = parseFloat(
-                matchTotal[1].replace(/\./g, "").replace(",", ".")
-              );
+              totalStakeExtraido = parseBRLNumber(matchTotal[1]);
             }
           }
         } else {

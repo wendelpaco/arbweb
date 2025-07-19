@@ -15,6 +15,7 @@ import { X } from "lucide-react";
 import { Input } from "./Input";
 import { formatOdds } from "../../utils/formatters";
 import { Label } from "@radix-ui/react-label";
+import { calculateOptimalStakes } from "../../utils/calculations";
 
 function formatNumberInput(value: string | number) {
   if (typeof value === "number") return value;
@@ -46,6 +47,26 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
     (initialBookmakers ?? []).map((bm) => String(bm.odds ?? ""))
   );
 
+  // Estado para o total apostado (como string para facilitar digitação)
+  const [totalStakeInput, setTotalStakeInput] = useState<string>(() => {
+    const total = (initialBookmakers ?? []).reduce(
+      (sum, bm) =>
+        sum + (typeof bm.stake === "string" ? parseFloat(bm.stake) : bm.stake),
+      0
+    );
+    return total ? total.toFixed(2).replace(".", ",") : "";
+  });
+
+  // Estado para o total apostado
+  const [totalStake, setTotalStake] = useState<number>(() => {
+    // Inicializa com a soma dos stakes atuais
+    return (initialBookmakers ?? []).reduce(
+      (sum, bm) =>
+        sum + (typeof bm.stake === "string" ? parseFloat(bm.stake) : bm.stake),
+      0
+    );
+  });
+
   React.useEffect(() => {
     setMatch(initialMatch);
     setBookmakers(initialBookmakers ?? []);
@@ -54,6 +75,28 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
   // Sincronizar oddsInputs quando abrir o modal ou mudar os bookmakers
   React.useEffect(() => {
     setOddsInputs((initialBookmakers ?? []).map((bm) => String(bm.odds ?? "")));
+  }, [initialBookmakers, isOpen]);
+
+  // Sincronizar totalStakeInput ao abrir o modal ou mudar os bookmakers
+  React.useEffect(() => {
+    const total = (initialBookmakers ?? []).reduce(
+      (sum, bm) =>
+        sum + (typeof bm.stake === "string" ? parseFloat(bm.stake) : bm.stake),
+      0
+    );
+    setTotalStakeInput(total ? total.toFixed(2).replace(".", ",") : "");
+  }, [initialBookmakers, isOpen]);
+
+  // Sincronizar totalStake ao abrir o modal ou mudar os bookmakers
+  React.useEffect(() => {
+    setTotalStake(
+      (initialBookmakers ?? []).reduce(
+        (sum, bm) =>
+          sum +
+          (typeof bm.stake === "string" ? parseFloat(bm.stake) : bm.stake),
+        0
+      )
+    );
   }, [initialBookmakers, isOpen]);
 
   // Atualizar oddsInputs ao editar odds
@@ -126,6 +169,26 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
 
   const handleRemoveBookmaker = (index: number) => {
     setBookmakers((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Função para recalcular stakes ao mudar o total
+  const handleTotalStakeChange = (value: string) => {
+    // Permitir vírgula ou ponto, até 2 casas decimais
+    let sanitized = value.replace(/[^0-9.,]/g, "").replace(/,/g, ".");
+    const parts = sanitized.split(".");
+    if (parts.length > 2) sanitized = parts[0] + "." + parts.slice(1).join("");
+    if (sanitized.includes(".")) {
+      const [intPart, decPart] = sanitized.split(".");
+      sanitized = intPart + "." + decPart.slice(0, 2);
+    }
+    setTotalStakeInput(sanitized.replace(".", ","));
+    // Só recalcula se odds válidas
+    const num = parseFloat(sanitized);
+    if (!isNaN(num) && num > 0 && bookmakers.every((bm) => bm.odds > 1)) {
+      const newBookmakers = calculateOptimalStakes(bookmakers, num);
+      setBookmakers(newBookmakers);
+      setOddsInputs(newBookmakers.map((bm) => String(bm.odds)));
+    }
   };
 
   // Cálculo em tempo real
@@ -213,6 +276,19 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
           <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             Casas de Apostas
           </h3>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-zinc-700 dark:text-zinc-200 font-medium">
+              Total Apostado:
+            </span>
+            <Input
+              type="text"
+              value={totalStakeInput}
+              onChange={(e) => handleTotalStakeChange(e.target.value)}
+              className="w-32 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 shadow focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all text-sm"
+              inputMode="decimal"
+              placeholder="Total"
+            />
+          </div>
           <Button
             size="sm"
             variant="default"
@@ -333,7 +409,7 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
                   <td className="px-2 py-2">
                     <Input
                       type="text"
-                      value={bm.stake}
+                      value={Number(bm.stake).toFixed(2).replace(".", ",")}
                       onChange={(e) =>
                         handleBookmakerChange(
                           i,
@@ -349,7 +425,7 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
                   <td className="px-2 py-2">
                     <Input
                       type="text"
-                      value={bm.profit}
+                      value={Number(bm.profit).toFixed(2).replace(".", ",")}
                       onChange={(e) =>
                         handleBookmakerChange(
                           i,
@@ -397,13 +473,6 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
             Salvar
           </Button>
         </DialogFooter>
-
-        <DialogClose asChild>
-          <button className="absolute top-4 right-4 p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-primary-500">
-            <X className="w-5 h-5" />
-            <span className="sr-only">Fechar</span>
-          </button>
-        </DialogClose>
       </DialogContent>
     </Dialog>
   );
