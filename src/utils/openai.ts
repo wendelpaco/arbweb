@@ -146,22 +146,32 @@ ${ocrText}
       function getPossibleStakes(stakeRaw: number | string): number[] {
         const raw = String(stakeRaw).replace(/[^0-9]/g, "");
         const results: number[] = [];
-        for (let i = 2; i <= Math.min(6, raw.length - 1); i++) {
-          const stake = parseFloat(raw.slice(0, -i) + "." + raw.slice(-i));
-          if (!isNaN(stake) && stake > 0 && stake < 10000) results.push(stake);
+        // Só aplicar split se for inteiro grande e não já float
+        if (raw.length >= 5 && !String(stakeRaw).includes(".")) {
+          for (let i = 2; i <= Math.min(6, raw.length - 1); i++) {
+            const stake = parseFloat(raw.slice(0, -i) + "." + raw.slice(-i));
+            if (!isNaN(stake) && stake > 0 && stake < 10000)
+              results.push(stake);
+          }
         }
-        return results.length ? results : [parseFloat(raw)];
+        // Se não for inteiro grande, retorna valor original
+        if (results.length === 0) {
+          const val = parseFloat(String(stakeRaw).replace(/,/g, "."));
+          results.push(val);
+        }
+        return results;
       }
       // Gerar todas as combinações possíveis
       function getAllStakeCombinations(bookmakers: any[]): number[][] {
         if (bookmakers.length === 0) return [[]];
         const [first, ...rest] = bookmakers;
         let options: number[] = [];
-        // Só aplicar splits se for inteiro grande e sem ponto
+        // Só aplicar splits se for inteiro grande e não já float
         if (
           (typeof first.stake === "number" &&
             first.stake >= 10000 &&
-            Number.isInteger(first.stake)) ||
+            Number.isInteger(first.stake) &&
+            !String(first.stake).includes(".")) ||
           (typeof first.stake === "string" &&
             !String(first.stake).includes(".") &&
             parseInt(first.stake) >= 10000)
@@ -171,7 +181,7 @@ ${ocrText}
           options = [
             typeof first.stake === "number"
               ? first.stake
-              : parseFloat(first.stake),
+              : parseFloat(String(first.stake).replace(/,/g, ".")),
           ];
         }
         const restComb: number[][] = getAllStakeCombinations(rest);
@@ -195,10 +205,29 @@ ${ocrText}
         }
       }
       if (bestCombo) {
-        result.bookmakers = result.bookmakers.map((bm: any, i: number) => ({
-          ...bm,
-          stake: bestCombo![i],
-        }));
+        result.bookmakers = result.bookmakers.map((bm: any, i: number) => {
+          let stake = bestCombo![i];
+          // --- AJUSTE FINAL: só dividir por 100 se stake for inteiro grande e não já float ---
+          if (
+            typeof stake === "number" &&
+            stake >= 10000 &&
+            Number.isInteger(stake)
+          ) {
+            console.warn(
+              "Stake pós-OpenAI ainda muito alta, ajustando:",
+              stake,
+              "→",
+              stake / 100
+            );
+            stake = stake / 100;
+          }
+          return { ...bm, stake };
+        });
+        // Log para depuração
+        console.log(
+          "Bookmakers após ajuste final de stake (OpenAI):",
+          result.bookmakers
+        );
       }
     }
     return result;

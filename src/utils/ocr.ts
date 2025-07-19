@@ -215,7 +215,17 @@ export function parseArbitrageFromText(text: string) {
   for (let line of lines) {
     const m = line.match(regex);
     if (m) {
-      let name = m[1].replace(/[^\w\s\-()]/g, "").trim();
+      let name = m[1].replace(/[^ -\w\s\-()]/g, "").trim();
+      // Se a linha começa com '+ 1', '+ 2', ou não tem nome claro, deixar vazio
+      if (
+        /^\+\s*\d+/.test(name) ||
+        name.length < 3 ||
+        /aposta|chance|lucro|brl|v$|^\d+$|profissionais|calculadora|online|segura/i.test(
+          name
+        )
+      ) {
+        name = "";
+      }
       let odds = parseFloat(m[2].replace(",", "."));
       let stakeRaw = m[3];
       let profit = parseFloat(m[4].replace(",", "."));

@@ -57,53 +57,59 @@ function parseArbitrageFromText(text: string) {
 
   // Detectar casas, odds, stakes, lucros
   for (let i = 0; i < lines.length; i++) {
-    // Regex para odds, stake e lucro (números com ponto ou vírgula)
+    // Regex: nome, tipo (texto livre), odd (3 casas decimais), stake, lucro
+    // Exemplo: Stake (BR) Acima 2.5 1º o time 3.200 614.75 BRL 99.45
     const regex =
-      /([A-Za-z0-9 ()\-+\.]+)\s+([0-9]{1,6}(?:[.,][0-9]{1,3})?)\s+([A-Za-z0-9 ()\-+\.]*)\s*([0-9]{1,8}(?:[.,][0-9]{1,2})?)\s*[A-Za-z]*\s*([0-9]{1,8}(?:[.,][0-9]{1,2})?)/;
+      /^([A-Za-z0-9 ()\-+\.,ªº°¹²³áàãâéèêíïóôõöúçüÁÀÃÂÉÈÊÍÏÓÔÕÖÚÇÜ\[\]\/:;_]+)\s+(.+?)\s+([0-9]{1,2}\.[0-9]{3})\s+([0-9]+(?:[.,][0-9]{1,2})?)\s*[A-Za-z]*\s*([0-9]+(?:[.,][0-9]{1,2})?)$/;
     const m = lines[i].match(regex);
     if (m) {
-      // Odds
-      let oddsRaw = m[2].replace(",", ".");
+      console.log("Linha OCR:", lines[i]);
+      console.log("Odd extraída:", m[3]);
+      console.log("Tipo de aposta extraído:", m[2]);
+      const name = m[1].trim();
+      const betType = m[2].trim();
+      let oddsRaw = m[3].replace(",", ".");
       let odds = parseFloat(oddsRaw);
-      // Odds: tratar '325.' ou '325' como '3.25'
-      if (
-        (/^\d{3}\.?$/.test(oddsRaw) || /^\d{1,2}[.,]\d{1,3}$/.test(oddsRaw)) &&
-        (isNaN(odds) || odds < 1.01 || odds > 100)
-      ) {
-        // Ex: '325.' ou '325' → '3.25'
-        odds = parseFloat(
-          oddsRaw.replace(/\.$/, "").slice(0, -2) +
-            "." +
-            oddsRaw.replace(/\.$/, "").slice(-2)
-        );
-        console.log(`Corrigindo odds colada: ${oddsRaw} → ${odds}`);
-      }
-      // Odds válidas: 1.01 a 100
-      if (isNaN(odds) || odds < 1.01 || odds > 100) {
-        odds = 0; // Marcar como erro de OCR
-      }
-      // Stake
       let stakeRaw = m[4].replace(/,/g, ".");
       let stake = parseFloat(stakeRaw);
-      // Corrigir stake colado (ex: 129000 → 1290.00), mas só se for >= 5 dígitos, > 9999 e sem ponto
+      // Corrigir stake colado (ex: 129000 → 1290.00), mas só se for >= 5 dígitos, > 9999 e sem ponto/vírgula
       if (
         !isNaN(stake) &&
         stake > 9999 &&
         /^\d{5,}$/.test(stakeRaw) &&
-        !stakeRaw.includes(".")
+        !stakeRaw.includes(".") &&
+        !stakeRaw.includes(",")
       ) {
-        stake = parseFloat(stakeRaw.slice(0, -2) + "." + stakeRaw.slice(-2));
-        console.log(`Corrigindo stake colado: ${stakeRaw} → ${stake}`);
+        const stakeCorrigido = parseFloat(
+          stakeRaw.slice(0, -2) + "." + stakeRaw.slice(-2)
+        );
+        console.log(`Corrigindo stake colado: ${stakeRaw} → ${stakeCorrigido}`);
+        stake = stakeCorrigido;
+      } else {
+        console.log(`Stake normal detectada: ${stakeRaw} → ${stake}`);
       }
-      // Aceitar apenas até 2 casas decimais
+      // Fallback: se stake > 10x aposta total, usar valor original
+      // (aposta total extraída do texto OCR, se disponível)
+      // Exemplo: "Aposta total: 360.58 BRL"
+      let totalStakeExtraido = 0;
+      const matchTotal = text.match(/Aposta total\s*[:=]?\s*([\d.,]+)/i);
+      if (matchTotal && matchTotal[1]) {
+        totalStakeExtraido = parseFloat(
+          matchTotal[1].replace(/\./g, "").replace(",", ".")
+        );
+      }
+      if (totalStakeExtraido > 0 && stake > 10 * totalStakeExtraido) {
+        console.warn(
+          `Stake ${stake} muito maior que aposta total extraída ${totalStakeExtraido}, usando valor original: ${stakeRaw}`
+        );
+        stake = parseFloat(stakeRaw);
+      }
       if (isNaN(stake) || !/^\d{1,6}(?:[.,]\d{1,2})?$/.test(stake.toString())) {
         stake = 0;
       }
       stakesArray.push(stake);
-      // Lucro
       let profitRaw = m[5] ? m[5].replace(/,/g, ".") : "";
       let profit = profitRaw ? parseFloat(profitRaw) : 0;
-      // Corrigir lucro colado (opcional, mesmo padrão do stake)
       if (
         (isNaN(profit) || profit > 10000) &&
         /^\d{5,}$/.test(profitRaw) &&
@@ -113,9 +119,9 @@ function parseArbitrageFromText(text: string) {
         console.log(`Corrigindo lucro colado: ${profitRaw} → ${profit}`);
       }
       bookmakers.push({
-        name: m[1].trim(),
+        name,
         odds,
-        betType: m[3]?.trim() || "",
+        betType,
         stake,
         profit,
       });

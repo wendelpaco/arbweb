@@ -24,9 +24,13 @@ import {
   validateAndCalculateArbitrage,
 } from "../utils/calculations";
 
-// Função para converter valor BRL string para número
-function parseBRLNumber(str: string): number {
+// Função para converter valor BRL string para número, tratando valores colados
+function parseBRLNumberSmart(str: string): number {
   str = str.trim();
+  // Só tratar como colado se for maior que 6 dígitos (ex: 1000000 = 10000.00)
+  if (!str.includes(",") && !str.includes(".") && str.length > 6) {
+    return parseFloat(str.slice(0, -2) + "." + str.slice(-2));
+  }
   if (str.includes(",")) {
     return parseFloat(str.replace(/\./g, "").replace(",", "."));
   }
@@ -74,7 +78,7 @@ export const Upload: React.FC = () => {
             // Regex para "Aposta total: 17200 BRL" no texto OCR
             const matchTotal = text.match(/Aposta total\s*[:=]?\s*([\d.,]+)/i);
             if (matchTotal && matchTotal[1]) {
-              totalStakeExtraido = parseBRLNumber(matchTotal[1]);
+              totalStakeExtraido = parseBRLNumberSmart(matchTotal[1]);
             }
           }
         } else {
@@ -120,16 +124,39 @@ export const Upload: React.FC = () => {
         }
         // Se houver aposta total extraída e odds válidas, distribuir stakes de forma ótima
         let bmsWithProfit = bookmakers;
+        // --- AJUSTE DE ESCALA DE STAKE ---
+        bmsWithProfit = bmsWithProfit.map((bm: any) => {
+          let stake = bm.stake;
+          // Só ajustar se for inteiro grande e não já float
+          if (
+            typeof stake === "number" &&
+            stake >= 10000 &&
+            Number.isInteger(stake) &&
+            String(stake).indexOf(".") === -1
+          ) {
+            console.warn(
+              "Stake muito alta detectada, ajustando escala:",
+              stake,
+              "→",
+              stake / 100
+            );
+            stake = stake / 100;
+          }
+          return { ...bm, stake };
+        });
+        // --- FIM AJUSTE DE ESCALA ---
+        // Log para depuração
+        console.log("Bookmakers após ajuste de stake:", bmsWithProfit);
         if (
           totalStakeExtraido > 0 &&
-          bookmakers.every((bm: any) => bm.odds > 1)
+          bmsWithProfit.every((bm: any) => bm.odds > 1)
         ) {
           bmsWithProfit = calculateOptimalStakes(
-            bookmakers,
+            bmsWithProfit,
             totalStakeExtraido
           );
         } else {
-          bmsWithProfit = bookmakers.map((bm: any) => ({
+          bmsWithProfit = bmsWithProfit.map((bm: any) => ({
             ...bm,
             profit: bm.stake * bm.odds,
           }));
@@ -300,7 +327,7 @@ export const Upload: React.FC = () => {
         </Card>
 
         {/* Error Display */}
-        {error && (
+        {!processedData?.bookmakers?.length && error && (
           <Card className="max-w-2xl mx-auto border-accent-200 bg-accent-50 p-4 sm:p-6 rounded-2xl flex items-center gap-3 mb-6 sm:mb-8">
             <X className="w-5 h-5 text-accent-600" />
             <div>
@@ -547,6 +574,21 @@ export const Upload: React.FC = () => {
               <h4 className="font-medium text-zinc-900 dark:text-zinc-100 mb-4">
                 Casas de Apostas
               </h4>
+              {processedData &&
+                processedData.bookmakers &&
+                processedData.bookmakers.some(
+                  (b: any) =>
+                    !b.name || !b.betType || !processedData.match?.competition
+                ) && (
+                  <div className="mb-4 p-3 rounded-xl bg-yellow-50 border border-yellow-300 text-yellow-800 text-sm font-medium flex items-center gap-2">
+                    <span>⚠️</span>
+                    <span>
+                      Algumas linhas estão sem Casa de Aposta, Tipo ou
+                      Competição preenchido. Você pode seguir normalmente, mas
+                      recomendamos preencher para melhor organização.
+                    </span>
+                  </div>
+                )}
               <div className="overflow-x-auto">
                 <table className="w-full rounded-xl overflow-hidden">
                   <thead className="bg-zinc-100 dark:bg-zinc-800 sticky top-0 z-10">
@@ -576,13 +618,13 @@ export const Upload: React.FC = () => {
                           className="border-b border-zinc-100 dark:border-zinc-800"
                         >
                           <td className="py-3 px-4 font-medium text-zinc-900 dark:text-zinc-100">
-                            {bookmaker.name}
+                            {bookmaker.name || `Casa ${index + 1}`}
                           </td>
                           <td className="py-3 px-4 text-zinc-900 dark:text-zinc-100">
                             {bookmaker.odds}
                           </td>
                           <td className="py-3 px-4 text-zinc-900 dark:text-zinc-100">
-                            {bookmaker.betType}
+                            {bookmaker.betType || `Tipo ${index + 1}`}
                           </td>
                           <td className="py-3 px-4 text-zinc-900 dark:text-zinc-100">
                             {formatCurrency(bookmaker.stake)}

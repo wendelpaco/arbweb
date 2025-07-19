@@ -156,7 +156,31 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
   };
 
   const handleSave = () => {
-    onSave(match, bookmakers);
+    // Ajustar escala de stake antes de salvar
+    const adjustedBookmakers = bookmakers.map((bm) => {
+      let stake = bm.stake;
+      if (
+        typeof stake === "number" &&
+        stake >= 10000 &&
+        Number.isInteger(stake) &&
+        String(stake).indexOf(".") === -1
+      ) {
+        console.warn(
+          "Stake muito alta detectada na edição, ajustando escala:",
+          stake,
+          "→",
+          stake / 100
+        );
+        stake = stake / 100;
+      }
+      return { ...bm, stake };
+    });
+    // Log para depuração
+    console.log(
+      "Bookmakers após ajuste de stake (edição):",
+      adjustedBookmakers
+    );
+    onSave(match, adjustedBookmakers);
     onClose();
   };
 
@@ -382,7 +406,7 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
                       onChange={(e) =>
                         handleBookmakerChange(i, "name", e.target.value)
                       }
-                      placeholder="Casa"
+                      placeholder="Casa (opcional)"
                       className="rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 shadow focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all text-xs"
                     />
                   </td>
@@ -402,7 +426,7 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
                       onChange={(e) =>
                         handleBookmakerChange(i, "betType", e.target.value)
                       }
-                      placeholder="Tipo"
+                      placeholder="Tipo (opcional)"
                       className="rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 shadow focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-all text-xs"
                     />
                   </td>

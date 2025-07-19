@@ -1,4 +1,5 @@
 import { Bookmaker, Metrics } from "../types";
+import { formatCurrency } from "./formatters";
 
 // Validar se é uma arbitragem válida
 export const isValidArbitrage = (bookmakers: Bookmaker[]): boolean => {
@@ -55,11 +56,17 @@ export const calculateMetrics = (bookmakers: Bookmaker[]): Metrics => {
   }));
   const totalStake = safeBookmakers.reduce((sum, bm) => sum + bm.stake, 0);
   // Cálculo correto para arbitragem de 2 ou mais vias:
+  // Para cada aposta: lucro = payout - totalStake
   const profits = safeBookmakers.map((bm) => bm.stake * bm.odds - totalStake);
   const totalProfit = Math.min(...profits);
-  const profitPercentage = calculateProfitPercentage(totalProfit, totalStake);
-  const roi = calculateROI(totalProfit, totalStake);
-  const arbitragePercentage = calculateArbitragePercentage(safeBookmakers);
+  const profitPercentage = (totalProfit / totalStake) * 100;
+  const roi = (totalProfit / totalStake) * 100;
+  // Percentual de arbitragem: (1 / soma(1/odds)) * 100
+  const totalArbitrage = safeBookmakers.reduce(
+    (sum, bm) => sum + 1 / bm.odds,
+    0
+  );
+  const arbitragePercentage = (1 / totalArbitrage) * 100;
   return {
     totalProfit,
     profitPercentage,
@@ -126,8 +133,8 @@ export const validateAndCalculateArbitrage = (bookmakers: Bookmaker[]) => {
   }
   return {
     isValid: true,
-    message: `Arbitragem válida! Lucro garantido: ${metrics.totalProfit.toFixed(
-      2
+    message: `Arbitragem válida! Lucro garantido: ${formatCurrency(
+      metrics.totalProfit
     )}`,
     metrics,
   };
