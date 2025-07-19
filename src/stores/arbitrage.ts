@@ -59,11 +59,12 @@ export const useArbitrageStore = create<ArbitrageState>()(
       },
 
       updateArbitrage: (id, updates) => {
-        set((state) => ({
-          arbitrages: state.arbitrages.map((arb) =>
+        set((state) => {
+          const updatedArbitrages = state.arbitrages.map((arb) =>
             arb.id === id ? { ...arb, ...updates } : arb
-          ),
-        }));
+          );
+          return { arbitrages: updatedArbitrages };
+        });
         get().calculateDashboardMetrics();
       },
 
@@ -292,7 +293,6 @@ export const useArbitrageStore = create<ArbitrageState>()(
       name: "arbitrage-storage", // nome da chave no localStorage
       partialize: (state) => ({
         arbitrages: state.arbitrages,
-        dashboardMetrics: state.dashboardMetrics,
       }),
       // Corrigir a hidratação do estado
       onRehydrateStorage: () => (state) => {

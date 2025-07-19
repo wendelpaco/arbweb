@@ -60,21 +60,6 @@ export const calculateMetrics = (bookmakers: Bookmaker[]): Metrics => {
   const profitPercentage = calculateProfitPercentage(totalProfit, totalStake);
   const roi = calculateROI(totalProfit, totalStake);
   const arbitragePercentage = calculateArbitragePercentage(safeBookmakers);
-  // LOGS TEMPORÁRIOS PARA DEBUG
-  console.log("==== MÉTRICAS ARBITRAGEM ====");
-  console.log("Bookmakers:", safeBookmakers);
-  console.log(
-    "Stakes:",
-    safeBookmakers.map((bm) => bm.stake)
-  );
-  console.log(
-    "Odds:",
-    safeBookmakers.map((bm) => bm.odds)
-  );
-  console.log("Profits:", profits);
-  console.log("totalStake:", totalStake);
-  console.log("totalProfit:", totalProfit);
-  // FIM LOGS
   return {
     totalProfit,
     profitPercentage,

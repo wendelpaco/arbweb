@@ -52,17 +52,25 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
     value: string | number
   ) => {
     setBookmakers((prev) =>
-      prev.map((bm, i) =>
-        i === index
-          ? {
-              ...bm,
-              [field]:
-                field === "odds" || field === "stake" || field === "profit"
-                  ? Number(value)
-                  : value,
-            }
-          : bm
-      )
+      prev.map((bm, i) => {
+        if (i === index) {
+          const updatedBm = {
+            ...bm,
+            [field]:
+              field === "odds" || field === "stake" || field === "profit"
+                ? Number(value)
+                : value,
+          };
+
+          // Recalcular payout automaticamente quando stake ou odds mudam
+          if (field === "stake" || field === "odds") {
+            updatedBm.profit = updatedBm.stake * updatedBm.odds;
+          }
+
+          return updatedBm;
+        }
+        return bm;
+      })
     );
   };
 
@@ -91,7 +99,14 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
     const validBookmakers = (bookmakers ?? []).filter(
       (bm) => bm.odds > 0 && bm.stake > 0
     );
-    return validateAndCalculateArbitrage(validBookmakers);
+
+    // Recalcular profit para cada bookmaker baseado em stake e odds
+    const updatedBookmakers = validBookmakers.map((bm) => ({
+      ...bm,
+      profit: bm.stake * bm.odds,
+    }));
+
+    return validateAndCalculateArbitrage(updatedBookmakers);
   }, [bookmakers]);
 
   const isLucrativa =
@@ -177,19 +192,27 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
         {bookmakers.length > 1 && (
           <div
             className={`mb-4 p-3 sm:p-4 rounded-xl flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-2 sm:gap-4 ${
-              isLucrativa
+              arbitrageInfo.isValid && isLucrativa
                 ? "bg-green-50 border border-green-200"
+                : arbitrageInfo.isValid
+                ? "bg-yellow-50 border border-yellow-200"
                 : "bg-red-50 border border-red-200"
             }`}
           >
             <span
               className={`font-bold text-base sm:text-lg ${
-                isLucrativa ? "text-green-700" : "text-red-700"
+                arbitrageInfo.isValid && isLucrativa
+                  ? "text-green-700"
+                  : arbitrageInfo.isValid
+                  ? "text-yellow-700"
+                  : "text-red-700"
               }`}
             >
-              {isLucrativa
+              {arbitrageInfo.isValid && isLucrativa
                 ? "Arbitragem Lucrativa"
-                : "Arbitragem Não Lucrativa"}
+                : arbitrageInfo.isValid
+                ? "Arbitragem Válida (Sem Lucro)"
+                : "Arbitragem Inválida"}
             </span>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-sm">
               <span className="text-zinc-700 dark:text-zinc-200">
@@ -201,13 +224,26 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
               </span>
               <span className="text-zinc-700 dark:text-zinc-200">
                 Lucro Garantido:{" "}
-                <b>
+                <b
+                  className={
+                    arbitrageInfo.metrics.totalProfit >= 0
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }
+                >
                   {arbitrageInfo.metrics.totalProfit.toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL",
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
                   })}
                 </b>
               </span>
+              {!arbitrageInfo.isValid && (
+                <span className="text-red-600 text-xs">
+                  {arbitrageInfo.message}
+                </span>
+              )}
             </div>
           </div>
         )}
