@@ -8,12 +8,11 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogClose,
 } from "./dialog";
 import { validateAndCalculateArbitrage } from "../../utils/calculations";
 import { X } from "lucide-react";
 import { Input } from "./Input";
-import { formatOdds } from "../../utils/formatters";
+// import { formatOdds } from "../../utils/formatters";
 import { Label } from "@radix-ui/react-label";
 import { calculateOptimalStakes } from "../../utils/calculations";
 
@@ -57,16 +56,6 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
     return total ? total.toFixed(2).replace(".", ",") : "";
   });
 
-  // Estado para o total apostado
-  const [totalStake, setTotalStake] = useState<number>(() => {
-    // Inicializa com a soma dos stakes atuais
-    return (initialBookmakers ?? []).reduce(
-      (sum, bm) =>
-        sum + (typeof bm.stake === "string" ? parseFloat(bm.stake) : bm.stake),
-      0
-    );
-  });
-
   React.useEffect(() => {
     setMatch(initialMatch);
     setBookmakers(initialBookmakers ?? []);
@@ -85,18 +74,6 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
       0
     );
     setTotalStakeInput(total ? total.toFixed(2).replace(".", ",") : "");
-  }, [initialBookmakers, isOpen]);
-
-  // Sincronizar totalStake ao abrir o modal ou mudar os bookmakers
-  React.useEffect(() => {
-    setTotalStake(
-      (initialBookmakers ?? []).reduce(
-        (sum, bm) =>
-          sum +
-          (typeof bm.stake === "string" ? parseFloat(bm.stake) : bm.stake),
-        0
-      )
-    );
   }, [initialBookmakers, isOpen]);
 
   // Atualizar oddsInputs ao editar odds
