@@ -79,8 +79,9 @@ export const Header: React.FC = () => {
         {/* Mobile Menu Button */}
         <button
           onClick={toggleMobileMenu}
-          className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors"
+          className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
           aria-label="Toggle mobile menu"
+          aria-expanded={isMobileMenuOpen}
         >
           {isMobileMenuOpen ? (
             <X className="w-5 h-5 text-primary" />
@@ -91,25 +92,30 @@ export const Header: React.FC = () => {
       </div>
 
       {/* Mobile Navigation */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden">
-          <div className="bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 shadow-lg">
-            <nav className="px-6 py-4 space-y-2">
-              {menuItems.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  onClick={closeMobileMenu}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-zinc-700 dark:text-zinc-200 hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/20 transition font-medium"
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </a>
-              ))}
-            </nav>
-          </div>
+      <div
+        className={cn(
+          "md:hidden transition-all duration-300 ease-in-out",
+          isMobileMenuOpen
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 -translate-y-2 pointer-events-none"
+        )}
+      >
+        <div className="bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 shadow-lg">
+          <nav className="px-6 py-4 space-y-1">
+            {menuItems.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                onClick={closeMobileMenu}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-zinc-700 dark:text-zinc-200 hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/20 transition-all duration-200 font-medium"
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </a>
+            ))}
+          </nav>
         </div>
-      )}
+      </div>
     </header>
   );
 };
