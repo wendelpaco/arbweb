@@ -444,12 +444,6 @@ export const Dashboard: React.FC = () => {
                       Fechar
                     </Button>
                   </DialogFooter>
-                  <DialogClose asChild>
-                    <button className="absolute top-4 right-4 p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                      <X className="w-5 h-5" />
-                      <span className="sr-only">Fechar</span>
-                    </button>
-                  </DialogClose>
                 </DialogContent>
               </Dialog>
             )}
