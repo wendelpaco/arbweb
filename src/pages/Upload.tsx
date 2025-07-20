@@ -20,22 +20,22 @@ import {
 import { EditArbitrageModal } from "../components/ui/EditArbitrageModal";
 import { useUIStore } from "../stores/ui";
 import {
-  calculateOptimalStakes,
+  // calculateOptimalStakes,
   validateAndCalculateArbitrage,
 } from "../utils/calculations";
 
 // Função para converter valor BRL string para número, tratando valores colados
-function parseBRLNumberSmart(str: string): number {
-  str = str.trim();
-  // Só tratar como colado se for maior que 6 dígitos (ex: 1000000 = 10000.00)
-  if (!str.includes(",") && !str.includes(".") && str.length > 6) {
-    return parseFloat(str.slice(0, -2) + "." + str.slice(-2));
-  }
-  if (str.includes(",")) {
-    return parseFloat(str.replace(/\./g, "").replace(",", "."));
-  }
-  return parseFloat(str.replace(/\./g, ""));
-}
+// function parseBRLNumberSmart(str: string): number {
+//   str = str.trim();
+//   // Só tratar como colado se for maior que 6 dígitos (ex: 1000000 = 10000.00)
+//   if (!str.includes(",") && !str.includes(".") && str.length > 6) {
+//     return parseFloat(str.slice(0, -2) + "." + str.slice(-2));
+//   }
+//   if (str.includes(",")) {
+//     return parseFloat(str.replace(/\./g, "").replace(",", "."));
+//   }
+//   return parseFloat(str.replace(/\./g, ""));
+// }
 
 export const Upload: React.FC = () => {
   const { addArbitrage, setLoading, setError } = useArbitrageStore();
@@ -60,9 +60,8 @@ export const Upload: React.FC = () => {
         const text = await import("../utils/ocr").then((m) =>
           m.extractTextFromImage(file)
         );
-        let match,
-          bookmakers,
-          totalStakeExtraido = 0;
+        let match, bookmakers;
+        // totalStakeExtraido = 0;
         const openaiKey = import.meta.env.VITE_OPENAI_API_KEY;
         if (openaiKey) {
           // Usar OpenAI para estruturar os dados
@@ -73,12 +72,12 @@ export const Upload: React.FC = () => {
           bookmakers = result.bookmakers;
           // Tentar extrair aposta total do JSON retornado
           if (result.metrics && result.metrics.totalStake) {
-            totalStakeExtraido = result.metrics.totalStake;
+            // totalStakeExtraido = result.metrics.totalStake;
           } else {
             // Regex para "Aposta total: 17200 BRL" no texto OCR
             const matchTotal = text.match(/Aposta total\s*[:=]?\s*([\d.,]+)/i);
             if (matchTotal && matchTotal[1]) {
-              totalStakeExtraido = parseBRLNumberSmart(matchTotal[1]);
+              // totalStakeExtraido = parseBRLNumberSmart(matchTotal[1]);
             }
           }
         } else {
