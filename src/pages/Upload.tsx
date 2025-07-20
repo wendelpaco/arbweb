@@ -125,42 +125,19 @@ export const Upload: React.FC = () => {
         // Se houver aposta total extraída e odds válidas, distribuir stakes de forma ótima
         let bmsWithProfit = bookmakers;
         // --- AJUSTE DE ESCALA DE STAKE ---
+        // Remover ajuste de stake colada aqui. Apenas logar para depuração.
         bmsWithProfit = bmsWithProfit.map((bm: any) => {
-          let stake = bm.stake;
-          // Só ajustar se for inteiro grande e não já float
-          if (
-            typeof stake === "number" &&
-            stake >= 10000 &&
-            Number.isInteger(stake) &&
-            String(stake).indexOf(".") === -1
-          ) {
-            console.warn(
-              "Stake muito alta detectada, ajustando escala:",
-              stake,
-              "→",
-              stake / 100
-            );
-            stake = stake / 100;
-          }
-          return { ...bm, stake };
+          console.log("[UPLOAD] Stake extraído para", bm.name, ":", bm.stake);
+          return { ...bm };
         });
         // --- FIM AJUSTE DE ESCALA ---
         // Log para depuração
-        console.log("Bookmakers após ajuste de stake:", bmsWithProfit);
-        if (
-          totalStakeExtraido > 0 &&
-          bmsWithProfit.every((bm: any) => bm.odds > 1)
-        ) {
-          bmsWithProfit = calculateOptimalStakes(
-            bmsWithProfit,
-            totalStakeExtraido
-          );
-        } else {
-          bmsWithProfit = bmsWithProfit.map((bm: any) => ({
-            ...bm,
-            profit: bm.stake * bm.odds,
-          }));
-        }
+        console.log("[UPLOAD] Bookmakers após parser:", bmsWithProfit);
+        // NÃO USAR calculateOptimalStakes - manter valores extraídos do parser
+        bmsWithProfit = bmsWithProfit.map((bm: any) => ({
+          ...bm,
+          profit: bm.stake * bm.odds,
+        }));
         const validation = validateAndCalculateArbitrage(bmsWithProfit);
         const processedData = {
           match,
@@ -546,6 +523,14 @@ export const Upload: React.FC = () => {
                           console.log(
                             "[UI] Stake total numérico:",
                             processedData.metrics.totalStake
+                          );
+                          console.log(
+                            "[UI] Bookmakers para debug:",
+                            processedData.bookmakers.map((bm: any) => ({
+                              name: bm.name,
+                              stake: bm.stake,
+                              odds: bm.odds,
+                            }))
                           );
                           return formatCurrency(
                             processedData.metrics.totalStake

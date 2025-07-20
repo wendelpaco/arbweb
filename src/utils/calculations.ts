@@ -54,7 +54,19 @@ export const calculateMetrics = (bookmakers: Bookmaker[]): Metrics => {
     stake: typeof bm.stake === "string" ? parseFloat(bm.stake) : bm.stake,
     odds: typeof bm.odds === "string" ? parseFloat(bm.odds) : bm.odds,
   }));
+
+  // Log para debug
+  console.log(
+    "[CALC] Bookmakers para cálculo:",
+    safeBookmakers.map((bm) => ({
+      name: bm.name,
+      stake: bm.stake,
+      odds: bm.odds,
+    }))
+  );
+
   const totalStake = safeBookmakers.reduce((sum, bm) => sum + bm.stake, 0);
+  console.log("[CALC] Total stake calculado:", totalStake);
   // Cálculo correto para arbitragem de 2 ou mais vias:
   // Para cada aposta: lucro = payout - totalStake
   const profits = safeBookmakers.map((bm) => bm.stake * bm.odds - totalStake);

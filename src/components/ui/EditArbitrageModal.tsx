@@ -133,31 +133,9 @@ export const EditArbitrageModal: React.FC<EditArbitrageModalProps> = ({
   };
 
   const handleSave = () => {
-    // Ajustar escala de stake antes de salvar
-    const adjustedBookmakers = bookmakers.map((bm) => {
-      let stake = bm.stake;
-      if (
-        typeof stake === "number" &&
-        stake >= 10000 &&
-        Number.isInteger(stake) &&
-        String(stake).indexOf(".") === -1
-      ) {
-        console.warn(
-          "Stake muito alta detectada na edição, ajustando escala:",
-          stake,
-          "→",
-          stake / 100
-        );
-        stake = stake / 100;
-      }
-      return { ...bm, stake };
-    });
-    // Log para depuração
-    console.log(
-      "Bookmakers após ajuste de stake (edição):",
-      adjustedBookmakers
-    );
-    onSave(match, adjustedBookmakers);
+    // NÃO APLICAR AJUSTE DE ESCALA - VALOR EXTRAÍDO É O CORRETO
+    console.log("Bookmakers para salvar (sem ajuste de escala):", bookmakers);
+    onSave(match, bookmakers);
     onClose();
   };
 

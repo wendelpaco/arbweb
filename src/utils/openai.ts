@@ -207,25 +207,12 @@ ${ocrText}
       if (bestCombo) {
         result.bookmakers = result.bookmakers.map((bm: any, i: number) => {
           let stake = bestCombo![i];
-          // --- AJUSTE FINAL: só dividir por 100 se stake for inteiro grande e não já float ---
-          if (
-            typeof stake === "number" &&
-            stake >= 10000 &&
-            Number.isInteger(stake)
-          ) {
-            console.warn(
-              "Stake pós-OpenAI ainda muito alta, ajustando:",
-              stake,
-              "→",
-              stake / 100
-            );
-            stake = stake / 100;
-          }
+          // NÃO APLICAR AJUSTE DE ESCALA - VALOR EXTRAÍDO É O CORRETO
           return { ...bm, stake };
         });
         // Log para depuração
         console.log(
-          "Bookmakers após ajuste final de stake (OpenAI):",
+          "Bookmakers após parser OpenAI (sem ajuste de escala):",
           result.bookmakers
         );
       }

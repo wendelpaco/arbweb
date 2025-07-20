@@ -193,7 +193,16 @@ export const useArbitrageStore = create<ArbitrageState>()(
         );
 
         const profitByPeriod = recentArbitrages.reduce((acc, arb) => {
-          const date = arb.timestamp.toISOString().split("T")[0];
+          // Usar fuso horário local em vez de UTC
+          const date = new Date(arb.timestamp)
+            .toLocaleDateString("pt-BR", {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            })
+            .split("/")
+            .reverse()
+            .join("-"); // Converte DD/MM/YYYY para YYYY-MM-DD
           acc[date] = (acc[date] || 0) + (arb.metrics?.totalProfit ?? 0);
           return acc;
         }, {} as { [key: string]: number });

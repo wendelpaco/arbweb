@@ -50,7 +50,29 @@ function parseArbitrageFromText(text: string) {
     if (line.toLowerCase().includes("aposta total")) {
       const stakeMatch = line.match(/([0-9.,]+)/);
       if (stakeMatch) {
-        // stakeTotal = parseFloat(stakeMatch[1].replace(/,/g, ".")); // Removed as per edit hint
+        let totalStr = stakeMatch[1];
+        let total = parseFloat(totalStr.replace(/,/g, "."));
+
+        // CORREÇÃO: Se o total é grande (>1000) e não tem ponto decimal, adicionar ponto 2 casas antes do final
+        if (
+          total > 1000 &&
+          !totalStr.includes(".") &&
+          !totalStr.includes(",")
+        ) {
+          const totalStrClean = totalStr.replace(/[^0-9]/g, "");
+          if (totalStrClean.length >= 4) {
+            const correctedTotal = parseFloat(
+              totalStrClean.slice(0, -2) + "." + totalStrClean.slice(-2)
+            );
+            console.log(
+              `[PARSER] Total corrigido: ${total} → ${correctedTotal} (${totalStr} → ${totalStrClean.slice(
+                0,
+                -2
+              )}.${totalStrClean.slice(-2)})`
+            );
+            // stakeTotal = correctedTotal; // Uncomment if needed
+          }
+        }
       }
     }
   }
@@ -89,13 +111,60 @@ function parseArbitrageFromText(text: string) {
         const beforeBrl = afterOdd.split(/BRL|brl/)[0];
         const stakeCandidates = Array.from(
           beforeBrl.matchAll(/([0-9]+(?:[.,][0-9]{1,2})?)/g)
-        ).map((x) => parseFloat(x[1].replace(/,/g, ".")));
+        ).map((x) => {
+          let numStr = x[1];
+          let num = parseFloat(numStr.replace(/,/g, "."));
+
+          // CORREÇÃO: Se o número é grande (>1000) e não tem ponto decimal, adicionar ponto 2 casas antes do final
+          if (num > 1000 && !numStr.includes(".") && !numStr.includes(",")) {
+            const numStrClean = numStr.replace(/[^0-9]/g, "");
+            if (numStrClean.length >= 4) {
+              const correctedNum = parseFloat(
+                numStrClean.slice(0, -2) + "." + numStrClean.slice(-2)
+              );
+              console.log(
+                `[PARSER] Stake corrigido: ${num} → ${correctedNum} (${numStr} → ${numStrClean.slice(
+                  0,
+                  -2
+                )}.${numStrClean.slice(-2)})`
+              );
+              return correctedNum;
+            }
+          }
+          return num;
+        });
+
         if (stakeCandidates.length) {
           stake = Math.max(...stakeCandidates);
         } else {
           // Se não achar antes de BRL, pega o maior número decimal
           stake = Math.max(
-            ...numMatches.map((x) => parseFloat(x.replace(/,/g, ".")))
+            ...numMatches.map((x) => {
+              let numStr = x;
+              let num = parseFloat(numStr.replace(/,/g, "."));
+
+              // CORREÇÃO: Se o número é grande (>1000) e não tem ponto decimal, adicionar ponto 2 casas antes do final
+              if (
+                num > 1000 &&
+                !numStr.includes(".") &&
+                !numStr.includes(",")
+              ) {
+                const numStrClean = numStr.replace(/[^0-9]/g, "");
+                if (numStrClean.length >= 4) {
+                  const correctedNum = parseFloat(
+                    numStrClean.slice(0, -2) + "." + numStrClean.slice(-2)
+                  );
+                  console.log(
+                    `[PARSER] Stake corrigido: ${num} → ${correctedNum} (${numStr} → ${numStrClean.slice(
+                      0,
+                      -2
+                    )}.${numStrClean.slice(-2)})`
+                  );
+                  return correctedNum;
+                }
+              }
+              return num;
+            })
           );
         }
         // Lucro: último número decimal da linha
@@ -103,6 +172,9 @@ function parseArbitrageFromText(text: string) {
           numMatches[numMatches.length - 1].replace(/,/g, ".")
         );
       }
+      // NÃO APLICAR NENHUMA MULTIPLICAÇÃO POR 100 - VALOR EXTRAÍDO É O CORRETO
+      console.log(`[PARSER] Stake extraído (valor final): ${stake}`);
+      console.log(`[PARSER] Lucro extraído (valor final): ${profit}`);
       console.log(`[PARSER] Stake extraído: ${stake}`);
       console.log(`[PARSER] Lucro extraído: ${profit}`);
       bookmakers.push({
