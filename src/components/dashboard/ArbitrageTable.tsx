@@ -11,7 +11,7 @@ import { Search } from "lucide-react";
 import { Input } from "../ui/Input";
 import { Label } from "../ui/label";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { useLocalStorageSync } from "../../hooks/use-local-storage-sync";
+// import { useLocalStorageSync } from "../../hooks/use-local-storage-sync";
 
 interface ArbitrageTableProps {
   arbitrages: ArbitrageData[];
@@ -28,16 +28,8 @@ export const ArbitrageTable: React.FC<ArbitrageTableProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Sincronizar com localStorage para garantir dados atualizados
-  const [localStorageData] = useLocalStorageSync("arbitrage-storage", {
-    state: { arbitrages: [] },
-  });
-
-  // Usar dados do localStorage se disponíveis, senão usar props
-  const displayArbitrages =
-    localStorageData?.state?.arbitrages?.length > 0
-      ? localStorageData.state.arbitrages
-      : arbitrages;
+  // Usar apenas as arbitragens recebidas por props (filtradas pelo Dashboard)
+  const displayArbitrages = arbitrages;
 
   const filteredArbitrages = displayArbitrages.filter(
     (arbitrage) =>

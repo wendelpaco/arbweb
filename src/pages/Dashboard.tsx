@@ -112,14 +112,35 @@ export const Dashboard: React.FC = () => {
 
   // Função para filtrar arbitragens conforme o período e filtros adicionais
   const getFilteredArbitrages = () => {
-    return filteredByPeriod.filter((arb) => {
-      if (filterSport && arb.match?.sport !== filterSport) return false;
-      if (
-        filterBookmaker &&
-        !arb.bookmakers?.some((bm) => bm.name === filterBookmaker)
-      )
-        return false;
-      return true;
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    if (period === "today") {
+      return arbitrages.filter((arb) => {
+        const ts = new Date(arb.timestamp);
+        return (
+          ts.getFullYear() === now.getFullYear() &&
+          ts.getMonth() === now.getMonth() &&
+          ts.getDate() === now.getDate()
+        );
+      });
+    } else if (period === "week") {
+      return arbitrages.filter((arb) => {
+        const ts = new Date(arb.timestamp);
+        return ts >= startOfWeek && ts <= now;
+      });
+    } else if (period === "month") {
+      return arbitrages.filter((arb) => {
+        const ts = new Date(arb.timestamp);
+        return ts >= startOfMonth && ts <= now;
+      });
+    }
+    // Para 'all', mostrar apenas até agora
+    return arbitrages.filter((arb) => {
+      const ts = new Date(arb.timestamp);
+      return ts <= now;
     });
   };
 
