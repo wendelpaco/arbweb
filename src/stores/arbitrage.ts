@@ -9,6 +9,9 @@ function reviveArbitrages(arbitrages: ArbitrageData[]): ArbitrageData[] {
   }));
 }
 
+// Adicionar tipo para período
+export type PeriodType = "today" | "week" | "month" | "all";
+
 interface ArbitrageState {
   arbitrages: ArbitrageData[];
   dashboardMetrics: DashboardMetrics;
@@ -22,7 +25,7 @@ interface ArbitrageState {
   setArbitrages: (arbitrages: ArbitrageData[]) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
-  calculateDashboardMetrics: () => void;
+  calculateDashboardMetrics: (period?: PeriodType) => void;
   clearAllData: () => void;
 }
 
@@ -109,10 +112,38 @@ export const useArbitrageStore = create<ArbitrageState>()(
         });
       },
 
-      calculateDashboardMetrics: () => {
+      calculateDashboardMetrics: (period = "all") => {
         const { arbitrages } = get();
 
-        if (arbitrages.length === 0) {
+        // Definir datas de início para cada período
+        const now = new Date();
+        const startOfToday = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate()
+        );
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        let filteredArbs = arbitrages;
+        if (period === "today") {
+          filteredArbs = arbitrages.filter(
+            (arb) => new Date(arb.timestamp) >= startOfToday
+          );
+        } else if (period === "week") {
+          filteredArbs = arbitrages.filter(
+            (arb) => new Date(arb.timestamp) >= startOfWeek
+          );
+        } else if (period === "month") {
+          filteredArbs = arbitrages.filter(
+            (arb) => new Date(arb.timestamp) >= startOfMonth
+          );
+        }
+        // Se for 'all', mantém todos
+
+        if (filteredArbs.length === 0) {
           set({
             dashboardMetrics: {
               totalProfit: 0,
@@ -137,31 +168,31 @@ export const useArbitrageStore = create<ArbitrageState>()(
         }
 
         // Calculate total profit
-        const totalProfit = arbitrages.reduce(
+        const totalProfit = filteredArbs.reduce(
           (sum, arb) => sum + (arb.metrics?.totalProfit ?? 0),
           0
         );
 
         // Calculate average ROI
-        const totalRoi = arbitrages.reduce(
+        const totalRoi = filteredArbs.reduce(
           (sum, arb) => sum + (arb.metrics?.roi ?? 0),
           0
         );
         const averageRoi =
-          arbitrages.length > 0 ? totalRoi / arbitrages.length : 0;
+          filteredArbs.length > 0 ? totalRoi / filteredArbs.length : 0;
 
         // Calculate success rate (arbitrages with positive profit)
-        const successfulArbitrages = arbitrages.filter(
+        const successfulArbitrages = filteredArbs.filter(
           (arb) => (arb.metrics?.totalProfit ?? 0) > 0
         );
         const successRate =
-          arbitrages.length > 0
-            ? (successfulArbitrages.length / arbitrages.length) * 100
+          filteredArbs.length > 0
+            ? (successfulArbitrages.length / filteredArbs.length) * 100
             : 0;
 
         // Find best bookmaker
         const bookmakerProfits: { [key: string]: number } = {};
-        arbitrages.forEach((arb) => {
+        filteredArbs.forEach((arb) => {
           (arb.bookmakers ?? []).forEach((bm) => {
             bookmakerProfits[bm.name] =
               (bookmakerProfits[bm.name] || 0) + bm.profit;
@@ -174,7 +205,7 @@ export const useArbitrageStore = create<ArbitrageState>()(
 
         // Find most profitable sport
         const sportProfits: { [key: string]: number } = {};
-        arbitrages.forEach((arb) => {
+        filteredArbs.forEach((arb) => {
           if (arb.match && arb.match.sport) {
             sportProfits[arb.match.sport] =
               (sportProfits[arb.match.sport] || 0) +
@@ -188,7 +219,7 @@ export const useArbitrageStore = create<ArbitrageState>()(
         // Calculate profit by period (last 30 days)
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const recentArbitrages = arbitrages.filter(
+        const recentArbitrages = filteredArbs.filter(
           (arb) => arb.timestamp >= thirtyDaysAgo
         );
 
@@ -218,7 +249,7 @@ export const useArbitrageStore = create<ArbitrageState>()(
         const bookmakerDistribution = Object.entries(bookmakerProfits).map(
           ([name, totalProfit]) => ({
             name,
-            count: arbitrages.filter((arb) =>
+            count: filteredArbs.filter((arb) =>
               (arb.bookmakers ?? []).some((bm) => bm.name === name)
             ).length,
             totalProfit,
@@ -229,7 +260,7 @@ export const useArbitrageStore = create<ArbitrageState>()(
         const sportDistribution = Object.entries(sportProfits).map(
           ([sport, totalProfit]) => ({
             sport,
-            count: arbitrages.filter(
+            count: filteredArbs.filter(
               (arb) => arb.match && arb.match.sport === sport
             ).length,
             totalProfit,
@@ -237,30 +268,19 @@ export const useArbitrageStore = create<ArbitrageState>()(
         );
 
         // Calcular valor total apostado
-        const totalStaked = arbitrages.reduce(
+        const totalStaked = filteredArbs.reduce(
           (sum, arb) => sum + (arb.metrics?.totalStake ?? 0),
           0
         );
 
-        // Calcular lucro e valor apostado por dia, semana, mês
-        const now = new Date();
-        const startOfToday = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          now.getDate()
-        );
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay());
-        startOfWeek.setHours(0, 0, 0, 0);
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
+        // Calcular lucro e valor apostado por dia, semana, mês (mantém para cards)
         let profitToday = 0,
           profitWeek = 0,
           profitMonth = 0;
         let stakedToday = 0,
           stakedWeek = 0,
           stakedMonth = 0;
-        arbitrages.forEach((arb) => {
+        filteredArbs.forEach((arb) => {
           const ts = new Date(arb.timestamp);
           if (ts >= startOfToday) {
             profitToday += arb.metrics?.totalProfit ?? 0;
@@ -279,7 +299,7 @@ export const useArbitrageStore = create<ArbitrageState>()(
         set({
           dashboardMetrics: {
             totalProfit,
-            totalArbitrages: arbitrages.length,
+            totalArbitrages: filteredArbs.length,
             averageRoi,
             successRate,
             bestBookmaker,

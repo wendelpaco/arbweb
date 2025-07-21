@@ -4,6 +4,7 @@ import { ArbitrageTable } from "../components/dashboard/ArbitrageTable";
 import { ProfitChart } from "../components/charts/ProfitChart";
 import { DistributionChart } from "../components/charts/DistributionChart";
 import { useArbitrageStore } from "../stores/arbitrage";
+import type { PeriodType } from "../stores/arbitrage";
 import { useAuthStore } from "../stores/auth";
 import { EditArbitrageModal } from "../components/ui/EditArbitrageModal";
 import { validateAndCalculateArbitrage } from "../utils/calculations";
@@ -61,6 +62,66 @@ export const Dashboard: React.FC = () => {
   const [toastMsg, setToastMsg] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [confirmDeleteName, setConfirmDeleteName] = useState<string>("");
+  const [period, setPeriod] = useState<PeriodType>("all");
+  // Filtros adicionais
+  const [filterSport, setFilterSport] = useState<string>("");
+  const [filterBookmaker, setFilterBookmaker] = useState<string>("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  // Gerar opções dinâmicas de esportes e casas a partir das arbitragens filtradas por período
+  const filteredByPeriod = React.useMemo(() => {
+    const now = new Date();
+    const startOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    if (period === "today") {
+      return arbitrages.filter(
+        (arb) => new Date(arb.timestamp) >= startOfToday
+      );
+    } else if (period === "week") {
+      return arbitrages.filter((arb) => new Date(arb.timestamp) >= startOfWeek);
+    } else if (period === "month") {
+      return arbitrages.filter(
+        (arb) => new Date(arb.timestamp) >= startOfMonth
+      );
+    }
+    return arbitrages;
+  }, [arbitrages, period]);
+
+  const sportOptions = React.useMemo(() => {
+    const set = new Set<string>();
+    filteredByPeriod.forEach((arb) => {
+      if (arb.match?.sport) set.add(arb.match.sport);
+    });
+    return Array.from(set);
+  }, [filteredByPeriod]);
+
+  const bookmakerOptions = React.useMemo(() => {
+    const set = new Set<string>();
+    filteredByPeriod.forEach((arb) => {
+      arb.bookmakers?.forEach((bm) => set.add(bm.name));
+    });
+    return Array.from(set);
+  }, [filteredByPeriod]);
+
+  // Função para filtrar arbitragens conforme o período e filtros adicionais
+  const getFilteredArbitrages = () => {
+    return filteredByPeriod.filter((arb) => {
+      if (filterSport && arb.match?.sport !== filterSport) return false;
+      if (
+        filterBookmaker &&
+        !arb.bookmakers?.some((bm) => bm.name === filterBookmaker)
+      )
+        return false;
+      return true;
+    });
+  };
 
   useEffect(() => {
     login({
@@ -73,8 +134,13 @@ export const Dashboard: React.FC = () => {
         notifications: true,
       },
     });
-    calculateDashboardMetrics();
-  }, [login, calculateDashboardMetrics]);
+    calculateDashboardMetrics(period);
+  }, [login, calculateDashboardMetrics, period]);
+
+  // Novo useEffect para recalcular ao trocar o período
+  useEffect(() => {
+    calculateDashboardMetrics(period);
+  }, [period, calculateDashboardMetrics]);
 
   React.useEffect(() => {
     if (!confirmDeleteId) return;
@@ -156,7 +222,29 @@ export const Dashboard: React.FC = () => {
             <h1 className="text-3xl font-bold mb-4 text-zinc-900 dark:text-zinc-100">
               Dashboard
             </h1>
-
+            {/* Filtro de período */}
+            <div className="flex gap-2 mb-6">
+              {[
+                { label: "Hoje", value: "today" },
+                { label: "Semana", value: "week" },
+                { label: "Mês", value: "month" },
+                { label: "Todos", value: "all" },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  className={`px-4 py-2 rounded-xl font-medium border transition-colors text-sm
+                    ${
+                      period === opt.value
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800 hover:bg-blue-50 dark:hover:bg-zinc-800"
+                    }
+                  `}
+                  onClick={() => setPeriod(opt.value as PeriodType)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
             <Toast
               open={showToast}
               onOpenChange={setShowToast}
@@ -275,12 +363,71 @@ export const Dashboard: React.FC = () => {
               </Card>
             </div>
             {/* Tabela de Arbitragens */}
-            <ArbitrageTable
-              arbitrages={arbitrages}
-              onView={handleViewArbitrage}
-              onEdit={handleEditArbitrage}
-              onDelete={handleDeleteArbitrage}
-            />
+            <div className="relative">
+              <ArbitrageTable
+                arbitrages={getFilteredArbitrages()}
+                onView={handleViewArbitrage}
+                onEdit={handleEditArbitrage}
+                onDelete={handleDeleteArbitrage}
+              />
+              {filtersOpen && (
+                <div className="absolute right-0 z-20 mt-2 w-72 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xl p-4 flex flex-col gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold mb-1 text-zinc-700 dark:text-zinc-200">
+                      Esporte
+                    </label>
+                    <select
+                      className="w-full rounded-lg border px-3 py-2 bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700"
+                      value={filterSport}
+                      onChange={(e) => setFilterSport(e.target.value)}
+                    >
+                      <option value="">Todos</option>
+                      {sportOptions.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold mb-1 text-zinc-700 dark:text-zinc-200">
+                      Casa de Aposta
+                    </label>
+                    <select
+                      className="w-full rounded-lg border px-3 py-2 bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700"
+                      value={filterBookmaker}
+                      onChange={(e) => setFilterBookmaker(e.target.value)}
+                    >
+                      <option value="">Todas</option>
+                      {bookmakerOptions.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setFilterSport("");
+                        setFilterBookmaker("");
+                      }}
+                    >
+                      Limpar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() => setFiltersOpen(false)}
+                    >
+                      Aplicar
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
             {/* Modal de edição */}
             {editModalOpen && (
               <EditArbitrageModal

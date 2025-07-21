@@ -81,14 +81,6 @@ export const ArbitrageTable: React.FC<ArbitrageTableProps> = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <Button
-            variant="default"
-            size="sm"
-            className="transition-all shadow-premium rounded-xl flex items-center gap-2 w-full sm:w-auto"
-          >
-            <Filter className="w-4 h-4" />
-            Filtros
-          </Button>
         </div>
       </div>
       <div className="overflow-x-auto">
