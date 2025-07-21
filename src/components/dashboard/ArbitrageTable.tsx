@@ -7,7 +7,7 @@ import {
   formatRelativeTime,
   formatCurrency,
 } from "../../utils/formatters";
-import { Search, Filter } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "../ui/Input";
 import { Label } from "../ui/label";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
