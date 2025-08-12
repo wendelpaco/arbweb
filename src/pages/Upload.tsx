@@ -308,7 +308,7 @@ export const Upload: React.FC = () => {
             <X className="w-5 h-5 text-accent-600" />
             <div>
               <h3 className="font-medium text-accent-800">
-                Erro no Processamento
+                Erro no Processamento!
               </h3>
               <p className="text-sm text-accent-700">{error}</p>
             </div>
